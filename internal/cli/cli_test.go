@@ -23,6 +23,20 @@ func newTestApp(t *testing.T) *cli.App {
 	return cli.New(reg)
 }
 
+func chdir(t *testing.T, dir string) {
+	t.Helper()
+	old, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = os.Chdir(old)
+	})
+}
+
 func TestAddCacheAndDiffInTemporaryGoProject(t *testing.T) {
 	app := newTestApp(t)
 	project := t.TempDir()
@@ -71,6 +85,37 @@ func TestAddCacheAndDiffInTemporaryGoProject(t *testing.T) {
 	}
 }
 
+func TestAddAndDiffUseDefaultTarget(t *testing.T) {
+	app := newTestApp(t)
+	project := t.TempDir()
+	chdir(t, project)
+	if err := os.WriteFile(filepath.Join(project, "go.mod"), []byte("module example.com/app\n\ngo 1.22\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := app.Run(context.Background(), []string{"add", "cache"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("add exit %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "internal/cache") {
+		t.Fatalf("add output should mention default target: %q", stdout.String())
+	}
+	if _, err := os.Stat(filepath.Join(project, "internal", "cache", ".scion-module.json")); err != nil {
+		t.Fatalf("metadata missing at default target: %v", err)
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	code = app.Run(context.Background(), []string{"diff", "cache"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("diff exit %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "cache matches embedded registry version") {
+		t.Fatalf("unexpected diff output: %q", stdout.String())
+	}
+}
+
 func TestAddRefusesExternalDependencyModuleWithoutStandalone(t *testing.T) {
 	app := newTestApp(t)
 	var stdout, stderr bytes.Buffer
@@ -80,6 +125,58 @@ func TestAddRefusesExternalDependencyModuleWithoutStandalone(t *testing.T) {
 	}
 	if !strings.Contains(stderr.String(), "stdlibOnly=false") {
 		t.Fatalf("expected stdlibOnly error, got %q", stderr.String())
+	}
+}
+
+func TestInfoShowsStandaloneHintForExternalDependencyModule(t *testing.T) {
+	app := newTestApp(t)
+	var stdout, stderr bytes.Buffer
+	code := app.Run(context.Background(), []string{"info", "auth"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("info exit %d, stderr=%q", code, stderr.String())
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		"Standard library only: false",
+		"Standalone required: true",
+		"scion add auth --standalone",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("info output missing %q: %q", want, out)
+		}
+	}
+}
+
+func TestCommandHelp(t *testing.T) {
+	app := newTestApp(t)
+	tests := [][]string{
+		{"help", "add"},
+		{"add", "--help"},
+		{"diff", "-h"},
+	}
+	for _, args := range tests {
+		var stdout, stderr bytes.Buffer
+		code := app.Run(context.Background(), args, &stdout, &stderr)
+		if code != 0 {
+			t.Fatalf("%v exit %d, stdout=%q stderr=%q", args, code, stdout.String(), stderr.String())
+		}
+		if !strings.Contains(stdout.String(), "Usage: scion") {
+			t.Fatalf("%v help missing usage: %q", args, stdout.String())
+		}
+	}
+}
+
+func TestFlagsCanPrecedeModule(t *testing.T) {
+	app := newTestApp(t)
+	project := t.TempDir()
+	target := filepath.Join(project, "internal", "cache")
+	var stdout, stderr bytes.Buffer
+	code := app.Run(context.Background(), []string{"add", "--to", target, "--dry-run", "cache"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("add exit %d, stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "Would copy") {
+		t.Fatalf("unexpected add output: %q", stdout.String())
 	}
 }
 

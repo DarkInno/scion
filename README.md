@@ -17,7 +17,7 @@ go install github.com/DarkInno/scion/cmd/scion@latest
 For reproducible installs, pin a release:
 
 ```bash
-go install github.com/DarkInno/scion/cmd/scion@v0.1.2
+go install github.com/DarkInno/scion/cmd/scion@v0.1.3
 ```
 
 Make sure your Go bin directory is on `PATH`, then verify the install:
@@ -30,15 +30,17 @@ scion list
 Copy a standard-library-only module into your project:
 
 ```bash
-scion add cache --to internal/cache --dry-run
-scion add cache --to internal/cache
-scion diff cache --target internal/cache
+scion add cache --dry-run
+scion add cache
+scion diff cache
 ```
+
+When `--to` or `--target` is omitted, Scion uses the module's default target, such as `internal/cache`. You can still override it with `--to <dir>` or `--target <dir>`.
 
 Scion copies source files and writes `.scion-module.json` metadata for later comparison. It never edits your project's `go.mod` automatically. Modules marked `stdlibOnly=false`, such as `auth`, require explicit standalone mode:
 
 ```bash
-scion add auth --standalone --to internal/auth
+scion add auth --standalone
 ```
 
 ## Binary Downloads
@@ -54,7 +56,7 @@ sha256sum -c SHA256SUMS
 On Windows PowerShell:
 
 ```powershell
-Get-FileHash .\scion_v0.1.2_windows_amd64.zip -Algorithm SHA256
+Get-FileHash .\scion_v0.1.3_windows_amd64.zip -Algorithm SHA256
 ```
 
 ## Why Copy-Paste?
@@ -87,11 +89,13 @@ Backend modules such as auth, CRUD, file upload, and rate limiting share most of
 ```bash
 scion list [--json]
 scion info <module> [--json]
-scion add <module> --to <dir> [--dry-run] [--force] [--standalone]
-scion diff <module> --target <dir> [--json]
+scion add <module> [--to <dir>] [--dry-run] [--force] [--standalone]
+scion diff <module> [--target <dir>] [--json]
 scion doctor [--strict] [--json]
 scion version [--json]
 ```
+
+Use `scion help <command>` for command-specific examples.
 
 ## Project Structure
 
@@ -148,8 +152,8 @@ foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Po
 Releases are created from semantic version tags:
 
 ```bash
-git tag -a v0.1.2 -m "v0.1.2"
-git push origin v0.1.2
+git tag -a v0.1.3 -m "v0.1.3"
+git push origin v0.1.3
 ```
 
 The release workflow verifies the CLI, rebuilds the embedded bundle check, cross-compiles binaries, generates `SHA256SUMS`, and publishes GitHub Release assets.

@@ -11,7 +11,7 @@ go install github.com/DarkInno/scion/cmd/scion@latest
 For reproducible installs, pin a release:
 
 ```bash
-go install github.com/DarkInno/scion/cmd/scion@v0.1.2
+go install github.com/DarkInno/scion/cmd/scion@v0.1.3
 ```
 
 Make sure your Go bin directory is on `PATH`, then verify the install:
@@ -37,14 +37,16 @@ Modules marked `stdlibOnly=true` can be copied directly into an existing project
 Preview the files first:
 
 ```bash
-scion add cache --to internal/cache --dry-run
+scion add cache --dry-run
 ```
 
 Copy the module:
 
 ```bash
-scion add cache --to internal/cache
+scion add cache
 ```
+
+Scion uses the module's default target when `--to` is omitted, such as `internal/cache` for `cache`. You can override it with `--to <dir>`.
 
 Scion writes `.scion-module.json` metadata in the target directory. This file records the copied module, registry version, source hashes, and whether standalone mode was used.
 
@@ -53,17 +55,17 @@ Scion writes `.scion-module.json` metadata in the target directory. This file re
 After you adapt the copied source, you can compare it against Scion's embedded template:
 
 ```bash
-scion diff cache --target internal/cache
+scion diff cache
 ```
 
-`diff` only reports differences. It never merges or overwrites your local changes.
+`diff` uses the module's default target when `--target` is omitted. It only reports differences and never merges or overwrites your local changes.
 
 ## Standalone Modules
 
 The `auth` module intentionally uses mature security dependencies for JWT and bcrypt. Copy it with standalone mode:
 
 ```bash
-scion add auth --standalone --to internal/auth
+scion add auth --standalone
 ```
 
 Scion still does not edit your project-level `go.mod`; standalone mode only copies the module's own `go.mod` and `go.sum` into the target.
@@ -81,7 +83,7 @@ sha256sum -c SHA256SUMS
 Windows PowerShell:
 
 ```powershell
-Get-FileHash .\scion_v0.1.2_windows_amd64.zip -Algorithm SHA256
+Get-FileHash .\scion_v0.1.3_windows_amd64.zip -Algorithm SHA256
 ```
 
 ## Manual Copy
