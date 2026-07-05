@@ -216,3 +216,29 @@ func matchesAny(patterns []string, rel string) bool {
 	}
 	return false
 }
+
+func CanonicalFileBytes(name string, data []byte) []byte {
+	if !isTextBundlePath(name) || !bytes.Contains(data, []byte{'\r'}) {
+		return data
+	}
+	data = bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
+	data = bytes.ReplaceAll(data, []byte("\r"), []byte("\n"))
+	return data
+}
+
+func isTextBundlePath(name string) bool {
+	base := strings.ToLower(path.Base(name))
+	switch base {
+	case ".gitignore", "dockerfile", "license", "makefile":
+		return true
+	}
+
+	switch strings.ToLower(path.Ext(name)) {
+	case ".css", ".env", ".go", ".html", ".js", ".json", ".jsx", ".md",
+		".mod", ".sql", ".sum", ".tmpl", ".tpl", ".ts", ".tsx", ".txt",
+		".yaml", ".yml":
+		return true
+	default:
+		return false
+	}
+}

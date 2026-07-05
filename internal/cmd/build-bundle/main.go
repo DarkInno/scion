@@ -79,6 +79,7 @@ func run(root, outDir string) error {
 		if err != nil {
 			return err
 		}
+		data = registry.CanonicalFileBytes(rel, data)
 		header := &zip.FileHeader{
 			Name:     rel,
 			Method:   zip.Store,
