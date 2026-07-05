@@ -8,10 +8,7 @@ import (
 	"testing"
 )
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
-
 func TestRecoveryNormal(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -193,10 +190,7 @@ func TestRecoveryMultiplePanics(t *testing.T) {
 	// If we reach here, all panics were recovered.
 }
 
-// ---------------------------------------------------------------------------
 // Benchmarks
-// ---------------------------------------------------------------------------
-
 func BenchmarkRecoveryNoPanic(b *testing.B) {
 	recovered := Recovery()
 	h := recovered(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -212,10 +206,7 @@ func BenchmarkRecoveryNoPanic(b *testing.B) {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
-
 // deepPanic recursively calls itself to generate a deep stack trace, then panics.
 func deepPanic(depth int) {
 	if depth == 0 {

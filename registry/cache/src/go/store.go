@@ -12,10 +12,7 @@ import (
 	"time"
 )
 
-// ---------------------------------------------------------------------------
 // Security limits
-// ---------------------------------------------------------------------------
-
 const (
 	// maxKeyLength is the maximum number of bytes allowed in a cache key.
 	// Keys longer than this are rejected to prevent unbounded memory growth
@@ -59,10 +56,7 @@ func validateKey(key string) error {
 	return nil
 }
 
-// ---------------------------------------------------------------------------
 // Entry
-// ---------------------------------------------------------------------------
-
 // Entry is a cached value together with its expiration metadata.
 type Entry[V any] struct {
 	Value      V
@@ -78,10 +72,7 @@ func (e Entry[V]) Expired() bool {
 	return time.Now().UnixNano() > e.Expiration
 }
 
-// ---------------------------------------------------------------------------
 // Store interface
-// ---------------------------------------------------------------------------
-
 // Store is the abstraction implemented by every cache backend. It is generic
 // over the value type V so that callers get type-safe access without any
 // runtime casts. A concrete in-memory implementation is provided by
@@ -109,10 +100,7 @@ type Store[V any] interface {
 	Close() error
 }
 
-// ---------------------------------------------------------------------------
 // LRU doubly-linked list
-// ---------------------------------------------------------------------------
-
 // lruNode is a single element of the LRU list. The same node pointer is
 // stored in the cache map so that recency updates are O(1).
 type lruNode[V any] struct {

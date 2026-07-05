@@ -8,10 +8,7 @@ import (
 	"strings"
 )
 
-// ============================================================================
 // Interface
-// ============================================================================
-
 // Limiter is the interface for rate limiters.
 // All three implementations (FixedWindowLimiter, SlidingWindowLimiter,
 // TokenBucketLimiter) satisfy this interface.
@@ -25,10 +22,7 @@ type Limiter interface {
 // a custom composite key.
 type KeyFunc func(r *http.Request) string
 
-// ============================================================================
 // Rate Limit Response Headers
-// ============================================================================
-
 const (
 	HeaderLimit      = "X-RateLimit-Limit"
 	HeaderRemaining  = "X-RateLimit-Remaining"
@@ -43,10 +37,7 @@ type rateLimitResponse struct {
 	RetryAfter int    `json:"retry_after"`
 }
 
-// ============================================================================
 // Middleware
-// ============================================================================
-
 // Middleware creates an HTTP middleware that rate limits requests using the
 // provided limiter and key function.
 //
@@ -105,10 +96,7 @@ func Middleware(limiter Limiter, keyFunc KeyFunc) func(http.Handler) http.Handle
 	}
 }
 
-// ============================================================================
 // Key Functions
-// ============================================================================
-
 // KeyByIP extracts the client IP address from the request.
 // It checks the following in order:
 //  1. X-Forwarded-For header (first IP in the list)

@@ -11,10 +11,7 @@ import (
 	"time"
 )
 
-// ============================================================================
 // Test Helpers
-// ============================================================================
-
 // okHandler returns a simple 200 OK handler for testing.
 func okHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -46,10 +43,7 @@ func assertHeader(t *testing.T, rr *httptest.ResponseRecorder, key, want string)
 	}
 }
 
-// ============================================================================
 // Constructor Tests
-// ============================================================================
-
 func TestNewFixedWindowLimiter(t *testing.T) {
 	store := NewMemoryStore()
 
@@ -163,10 +157,7 @@ func TestNewTokenBucketLimiter(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // FixedWindowLimiter Tests
-// ============================================================================
-
 func TestFixedWindowLimiter_Allow(t *testing.T) {
 	store := NewMemoryStore()
 	l, _ := NewFixedWindowLimiter(store, 3, time.Second)
@@ -254,10 +245,7 @@ func TestFixedWindowLimiter_ResetAt(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // SlidingWindowLimiter Tests
-// ============================================================================
-
 func TestSlidingWindowLimiter_Allow(t *testing.T) {
 	store := NewMemoryStore()
 	l, _ := NewSlidingWindowLimiter(store, 3, time.Second)
@@ -350,10 +338,7 @@ func TestSlidingWindowLimiter_DifferentKeys(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TokenBucketLimiter Tests
-// ============================================================================
-
 func TestTokenBucketLimiter_Allow(t *testing.T) {
 	store := NewMemoryStore()
 	l, _ := NewTokenBucketLimiter(store, 1.0, 3.0) // 1 token/sec, burst 3
@@ -444,10 +429,7 @@ func TestTokenBucketLimiter_DifferentKeys(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // MemoryStore Tests
-// ============================================================================
-
 func TestMemoryStore_BasicOperations(t *testing.T) {
 	s := NewMemoryStore()
 
@@ -555,10 +537,7 @@ func TestMemoryStore_LRUEvictionOrder(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // Key Function Tests
-// ============================================================================
-
 func TestKeyByIP(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -650,10 +629,7 @@ func TestKeyByCustom(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // Middleware Tests
-// ============================================================================
-
 func TestMiddleware_FixedWindow_AllowsThenDenies(t *testing.T) {
 	store := NewMemoryStore()
 	limiter, _ := NewFixedWindowLimiter(store, 2, time.Second)
@@ -897,10 +873,7 @@ func TestMiddleware_GlobalKey(t *testing.T) {
 	assertStatus(t, rr, http.StatusTooManyRequests)
 }
 
-// ============================================================================
 // Concurrent Test (basic, detailed in pentest_test.go)
-// ============================================================================
-
 func TestFixedWindowLimiter_Concurrent(t *testing.T) {
 	store := NewMemoryStore()
 	l, _ := NewFixedWindowLimiter(store, 100, time.Second)

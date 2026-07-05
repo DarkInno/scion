@@ -110,4 +110,4 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## License
 
-[MIT](LICENSE) — Copyright (c) 2026 Scion Contributors
+[MIT](LICENSE)

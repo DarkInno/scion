@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-// ---------- TestClientIPRemoteAddr ----------
-
 func TestClientIPRemoteAddr(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.RemoteAddr = "192.168.1.100:12345"
@@ -19,8 +17,6 @@ func TestClientIPRemoteAddr(t *testing.T) {
 		t.Errorf("expected 192.168.1.100, got %q", ip)
 	}
 }
-
-// ---------- TestClientIPProxyCount ----------
 
 func TestClientIPProxyCount(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -33,8 +29,6 @@ func TestClientIPProxyCount(t *testing.T) {
 		t.Errorf("expected 1.1.1.1 (leftmost after skipping 2 proxies), got %q", ip)
 	}
 }
-
-// ---------- TestClientIPCIDRWhitelist ----------
 
 func TestClientIPCIDRWhitelist(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -51,8 +45,6 @@ func TestClientIPCIDRWhitelist(t *testing.T) {
 	}
 }
 
-// ---------- TestClientIPNoXFF ----------
-
 func TestClientIPNoXFF(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.RemoteAddr = "172.16.0.5:8080"
@@ -66,8 +58,6 @@ func TestClientIPNoXFF(t *testing.T) {
 	}
 }
 
-// ---------- TestClientIPRealIP ----------
-
 func TestClientIPRealIP(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set("X-Real-IP", "203.0.113.50")
@@ -80,8 +70,6 @@ func TestClientIPRealIP(t *testing.T) {
 		t.Errorf("expected X-Real-IP value 203.0.113.50, got %q", ip)
 	}
 }
-
-// ---------- TestTrustedProxyMiddleware ----------
 
 func TestTrustedProxyMiddleware(t *testing.T) {
 	var capturedIP string
@@ -105,8 +93,6 @@ func TestTrustedProxyMiddleware(t *testing.T) {
 	}
 }
 
-// ---------- TestProxyCountClamp ----------
-
 func TestProxyCountClamp(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set("X-Forwarded-For", "1.1.1.1, 2.2.2.2, 3.3.3.3, 4.4.4.4, 5.5.5.5")
@@ -121,8 +107,6 @@ func TestProxyCountClamp(t *testing.T) {
 		t.Errorf("expected leftmost IP 1.1.1.1 when ProxyCount exceeds chain length, got %q", ip)
 	}
 }
-
-// ---------- TestIsTrustedProxy ----------
 
 func TestIsTrustedProxy(t *testing.T) {
 	tests := []struct {

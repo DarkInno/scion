@@ -9,8 +9,6 @@ import (
 	"testing"
 )
 
-// ---------- TestBodyLimitNormal ----------
-
 func TestBodyLimitNormal(t *testing.T) {
 	// Handler that reads the body and echoes it back.
 	echoHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -36,8 +34,6 @@ func TestBodyLimitNormal(t *testing.T) {
 		t.Errorf("expected 200 for normal body, got %d", rec.Code)
 	}
 }
-
-// ---------- TestBodyLimitExceeded ----------
 
 func TestBodyLimitExceeded(t *testing.T) {
 	echoHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -65,8 +61,6 @@ func TestBodyLimitExceeded(t *testing.T) {
 	}
 }
 
-// ---------- TestBodyLimitDefault ----------
-
 func TestBodyLimitDefault(t *testing.T) {
 	// Zero options => should use 1MB default.
 	handler := BodyLimit()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +75,6 @@ func TestBodyLimitDefault(t *testing.T) {
 		t.Errorf("expected 200 with default 1MB limit, got %d", rec.Code)
 	}
 }
-
-// ---------- TestBodyLimitMaxClamp ----------
 
 func TestBodyLimitMaxClamp(t *testing.T) {
 	// Set a limit > 100MB. It should be clamped to 100MB.
@@ -100,8 +92,6 @@ func TestBodyLimitMaxClamp(t *testing.T) {
 		t.Errorf("expected 200 after max clamp, got %d", rec.Code)
 	}
 }
-
-// ---------- BenchmarkBodyLimit ----------
 
 func BenchmarkBodyLimit(b *testing.B) {
 	handler := BodyLimit(BodyLimitOptions{MaxSize: 1 << 20})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

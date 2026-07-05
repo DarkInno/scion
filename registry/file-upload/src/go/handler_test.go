@@ -16,10 +16,7 @@ import (
 	"time"
 )
 
-// ---------------------------------------------------------------------------
 // Shared test helpers (also used by pentest_test.go)
-// ---------------------------------------------------------------------------
-
 // Valid magic-byte payloads for every supported type.
 func jpegBytes() []byte { return []byte{0xFF, 0xD8, 0xFF, 0xE0, 0, 16, 'J', 'F', 'I', 'F'} }
 func pngBytes() []byte  { return []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3} }
@@ -145,10 +142,7 @@ func tmpLocalStorage(t *testing.T) (*Handler, *LocalStorage, string) {
 	return h, h.Storage().(*LocalStorage), dir
 }
 
-// ---------------------------------------------------------------------------
 // config.go tests
-// ---------------------------------------------------------------------------
-
 func TestDefaults(t *testing.T) {
 	o := Defaults()
 	if o.MaxFileSize != DefaultMaxFileSize {
@@ -242,10 +236,7 @@ func TestGenerateUUIDv7(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // validate.go tests
-// ---------------------------------------------------------------------------
-
 func TestDetectFileType(t *testing.T) {
 	cases := []struct {
 		name string
@@ -340,10 +331,7 @@ func TestSanitizeFilename(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // storage.go tests
-// ---------------------------------------------------------------------------
-
 func TestMemoryStorageCRUD(t *testing.T) {
 	ctx := context.Background()
 	s := NewMemoryStorage("/files")
@@ -480,10 +468,7 @@ func TestLocalStorageRejectsTraversal(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // handler.go tests
-// ---------------------------------------------------------------------------
-
 func TestUploadEachType(t *testing.T) {
 	cases := []struct {
 		name string

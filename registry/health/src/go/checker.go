@@ -251,8 +251,6 @@ func (hc *HealthChecker) runConcurrent(ctx context.Context) (string, map[string]
 	return status, results
 }
 
-// --- validation helpers ---
-
 // isNilCheck reports whether c is an untyped-nil or typed-nil Check. A typed
 // nil (e.g. (*CustomCheck)(nil) returned by a failed constructor) would
 // otherwise panic on the Name() call, so it is detected defensively here.

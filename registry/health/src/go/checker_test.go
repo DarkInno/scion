@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-// --- helpers --------------------------------------------------------------
-
 // sleepCheck builds a CustomCheck that sleeps for d, respecting ctx.
 func sleepCheck(name string, d time.Duration) *CustomCheck {
 	c, _ := NewCustomCheck(name, func(ctx context.Context) error {
@@ -55,8 +53,6 @@ func localHTTPServer(t *testing.T, h http.Handler) (*httptest.Server, string) {
 	t.Cleanup(srv.Close)
 	return srv, host
 }
-
-// --- checker basics -------------------------------------------------------
 
 func TestNewDefaults(t *testing.T) {
 	hc := New()
@@ -141,8 +137,6 @@ func TestValidateName(t *testing.T) {
 	}
 }
 
-// --- validateURL / SSRF classification -----------------------------------
-
 func TestValidateURL(t *testing.T) {
 	good := []string{
 		"http://example.com/",
@@ -208,8 +202,6 @@ func TestIsPrivateIP(t *testing.T) {
 		t.Error("allowed CIDR flagged private")
 	}
 }
-
-// --- run checks -----------------------------------------------------------
 
 func TestRunChecksEmpty(t *testing.T) {
 	hc := New(WithCacheTTL(0))
@@ -305,8 +297,6 @@ func TestRunChecksConcurrentTiming(t *testing.T) {
 	}
 }
 
-// --- cache ----------------------------------------------------------------
-
 func TestCacheHitAndExpiry(t *testing.T) {
 	var calls int32
 	hc := New(WithCacheTTL(80*time.Millisecond), WithTimeout(time.Second))
@@ -348,8 +338,6 @@ func TestCacheDisabled(t *testing.T) {
 	}
 }
 
-// --- timeout / goroutine lifecycle ---------------------------------------
-
 func TestTimeoutContextCancel(t *testing.T) {
 	hc := New(WithCacheTTL(0), WithTimeout(50*time.Millisecond))
 	hc.AddCheck(sleepCheck("slow", 5*time.Second))
@@ -389,8 +377,6 @@ func TestTimeoutViaParentContext(t *testing.T) {
 		t.Fatalf("parent ctx timeout not respected: %v", elapsed)
 	}
 }
-
-// --- individual checks ----------------------------------------------------
 
 func TestHTTPCheckPassAndFail(t *testing.T) {
 	srv, host := localHTTPServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -505,16 +491,12 @@ func TestCustomCheck(t *testing.T) {
 	}
 }
 
-// --- liveness -------------------------------------------------------------
-
 func TestLiveness(t *testing.T) {
 	hc := New()
 	if r := hc.Liveness(); r.Status != StatusPass {
 		t.Fatalf("liveness = %+v", r)
 	}
 }
-
-// --- handlers -------------------------------------------------------------
 
 func TestHandlersHealthy(t *testing.T) {
 	hc := New(WithCacheTTL(0), WithTimeout(time.Second))
@@ -603,8 +585,6 @@ func TestHandlerContentType(t *testing.T) {
 	}
 }
 
-// --- JSON shape -----------------------------------------------------------
-
 func TestResultJSON(t *testing.T) {
 	pass := PassResult(5 * time.Millisecond)
 	b, _ := json.Marshal(pass)
@@ -630,8 +610,6 @@ func TestResultJSON(t *testing.T) {
 		t.Errorf("fail json should not have latency: %s", b)
 	}
 }
-
-// --- small helpers used by tests -----------------------------------------
 
 // rawCheck is a minimal Check used to exercise AddCheck validation directly,
 // bypassing the constructors' own name validation.

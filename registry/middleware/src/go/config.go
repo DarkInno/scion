@@ -145,8 +145,6 @@ func TraceDefaults() TraceOptions {
 	return TraceOptions{HeaderName: "traceparent"}
 }
 
-// --- Env parsing helpers ---
-
 // ParseEnvDuration reads a time.Duration from an env var (supports "30s", "5m", etc).
 func ParseEnvDuration(key string, defaultVal time.Duration) time.Duration {
 	v := os.Getenv(key)

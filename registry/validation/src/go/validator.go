@@ -220,12 +220,9 @@ func (f *Field) hasRequired() bool {
 	return false
 }
 
-// ---------------------------------------------------------------------------
 // Validation entry points are defined on *Builder. The following methods are
 // delegated from *Field so that the terminal field of a fluent chain can also
 // drive validation, e.g. validation.New().Field("x").Required().ValidateJSON(r).
-// ---------------------------------------------------------------------------
-
 // ValidateValues delegates to the underlying Builder.
 func (f *Field) ValidateValues(getter func(string) (string, bool)) *ValidationError {
 	return f.builder.ValidateValues(getter)
@@ -251,11 +248,8 @@ func (f *Field) ValidateForm(r *http.Request) *ValidationError {
 	return f.builder.ValidateForm(r)
 }
 
-// ---------------------------------------------------------------------------
 // Core rules (Required / Min / Max / Length). The remaining built-in rules
 // live in rules.go.
-// ---------------------------------------------------------------------------
-
 type requiredRule struct{}
 
 func (requiredRule) isRequired() {}
@@ -323,10 +317,7 @@ func formatNumber(f float64) string {
 	return strconv.FormatFloat(f, 'f', -1, 64)
 }
 
-// ---------------------------------------------------------------------------
 // Validation entry points.
-// ---------------------------------------------------------------------------
-
 // ValidateValues validates a value source accessed through getter. getter
 // returns the field value and whether it was present. This is the core
 // validation routine used by ValidateJSON/ValidateQuery/ValidateForm.

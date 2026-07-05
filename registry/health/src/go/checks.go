@@ -11,10 +11,7 @@ import (
 	"time"
 )
 
-// ---------------------------------------------------------------------------
 // HTTPCheck
-// ---------------------------------------------------------------------------
-
 // HTTPCheck performs an HTTP request and treats a 2xx/3xx response as healthy.
 // It enforces an SSRF policy both at construction time and at dial time.
 type HTTPCheck struct {
@@ -101,10 +98,7 @@ func (h *HTTPCheck) Execute(ctx context.Context) Result {
 	return Result{Status: StatusFail, Error: fmt.Sprintf("unexpected status code: %d", resp.StatusCode)}
 }
 
-// ---------------------------------------------------------------------------
 // TCPCheck
-// ---------------------------------------------------------------------------
-
 // TCPCheck attempts a TCP dial against an address (host:port). Private IPs are
 // allowed because TCP checks are typically aimed at internal services such as
 // databases and caches.
@@ -161,10 +155,7 @@ func (c *TCPCheck) Execute(ctx context.Context) Result {
 	return PassResult(time.Since(start))
 }
 
-// ---------------------------------------------------------------------------
 // CustomCheck
-// ---------------------------------------------------------------------------
-
 // CustomFunc is a user-supplied check. It must respect the provided context so
 // that timeouts and cancellations propagate correctly.
 type CustomFunc func(ctx context.Context) error
@@ -198,10 +189,7 @@ func (c *CustomCheck) Execute(ctx context.Context) Result {
 	return PassResult(time.Since(start))
 }
 
-// ---------------------------------------------------------------------------
 // SSRF / URL validation
-// ---------------------------------------------------------------------------
-
 // validateURL enforces the URL policy: non-empty, length <= MaxURLLen, no CRLF,
 // http/https scheme, host present and not a private/loopback address (unless
 // explicitly allowed).

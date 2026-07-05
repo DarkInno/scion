@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-// ---------- helpers ----------
-
 func newCORSHandler(next http.Handler, opts CORSOptions) http.Handler {
 	return CORS(opts)(next)
 }
@@ -18,8 +16,6 @@ func okHandler() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 	}
 }
-
-// ---------- TestCORSNoOrigin ----------
 
 func TestCORSNoOrigin(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
@@ -39,8 +35,6 @@ func TestCORSNoOrigin(t *testing.T) {
 	}
 }
 
-// ---------- TestCORSExactMatch ----------
-
 func TestCORSExactMatch(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
 		AllowedOrigins: []string{"https://example.com"},
@@ -56,8 +50,6 @@ func TestCORSExactMatch(t *testing.T) {
 	}
 }
 
-// ---------- TestCORSWildcardMatch ----------
-
 func TestCORSWildcardMatch(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
 		AllowedOrigins: []string{"https://*.example.com"},
@@ -72,8 +64,6 @@ func TestCORSWildcardMatch(t *testing.T) {
 		t.Errorf("expected Access-Control-Allow-Origin=https://sub.example.com, got %q", got)
 	}
 }
-
-// ---------- TestCORSPreflight ----------
 
 func TestCORSPreflight(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
@@ -102,8 +92,6 @@ func TestCORSPreflight(t *testing.T) {
 	}
 }
 
-// ---------- TestCORSNotAllowedOrigin ----------
-
 func TestCORSNotAllowedOrigin(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
 		AllowedOrigins: []string{"https://example.com"},
@@ -118,8 +106,6 @@ func TestCORSNotAllowedOrigin(t *testing.T) {
 		t.Errorf("expected no Access-Control-Allow-Origin, got %q", got)
 	}
 }
-
-// ---------- TestCORSCredentialsWithWildcard ----------
 
 func TestCORSCredentialsWithWildcard(t *testing.T) {
 	defer func() {
@@ -137,8 +123,6 @@ func TestCORSCredentialsWithWildcard(t *testing.T) {
 	})
 }
 
-// ---------- TestCORSSubdomainAttack ----------
-
 func TestCORSSubdomainAttack(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
 		AllowedOrigins: []string{"https://*.example.com"},
@@ -155,8 +139,6 @@ func TestCORSSubdomainAttack(t *testing.T) {
 	}
 }
 
-// ---------- TestCORSSuffixAttack ----------
-
 func TestCORSSuffixAttack(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
 		AllowedOrigins: []string{"https://*.example.com"},
@@ -172,8 +154,6 @@ func TestCORSSuffixAttack(t *testing.T) {
 		t.Errorf("suffix attack: expected no Access-Control-Allow-Origin, got %q", got)
 	}
 }
-
-// ---------- TestCORSVaryHeader ----------
 
 func TestCORSVaryHeader(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
@@ -202,8 +182,6 @@ func TestCORSVaryHeader(t *testing.T) {
 	}
 }
 
-// ---------- TestCORSExposeHeaders ----------
-
 func TestCORSExposeHeaders(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
 		AllowedOrigins: []string{"https://example.com"},
@@ -220,8 +198,6 @@ func TestCORSExposeHeaders(t *testing.T) {
 		t.Errorf("expected Access-Control-Expose-Headers=X-Custom-Header, X-Another, got %q", got)
 	}
 }
-
-// ---------- TestValidateCORSConfig ----------
 
 func TestValidateCORSConfig(t *testing.T) {
 	// Valid config should return nil.
@@ -241,8 +217,6 @@ func TestValidateCORSConfig(t *testing.T) {
 	}
 }
 
-// ---------- TestCORSMaxAgeClamp ----------
-
 func TestCORSMaxAgeClamp(t *testing.T) {
 	handler := newCORSHandler(okHandler(), CORSOptions{
 		AllowedOrigins: []string{"https://example.com"},
@@ -259,8 +233,6 @@ func TestCORSMaxAgeClamp(t *testing.T) {
 		t.Errorf("expected Access-Control-Max-Age to be clamped to 86400, got %q", got)
 	}
 }
-
-// ---------- Benchmarks ----------
 
 func BenchmarkCORSExactMatch(b *testing.B) {
 	handler := CORS(CORSOptions{

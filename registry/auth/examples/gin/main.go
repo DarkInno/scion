@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// In this example, auth is the copied Scion auth module.
+// auth is the copied Scion auth module.
 // In your real project, replace the import path:
 //
 //	import "yourproject/internal/auth"

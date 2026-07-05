@@ -7,10 +7,7 @@ import (
 	"testing"
 )
 
-// ---------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
-
 // ctxKey is used to store/retrieve the call log slice from context
 // without colliding with the package's own contextKey.
 type ctxKey int
@@ -46,10 +43,7 @@ func newRequest(log *[]string) *http.Request {
 	return req.WithContext(ctx)
 }
 
-// ---------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
-
 func TestChainOrder(t *testing.T) {
 	var log []string
 	c := Chain(middleware("m1"), middleware("m2"))
@@ -177,10 +171,7 @@ func TestChainEmpty(t *testing.T) {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Benchmarks
-// ---------------------------------------------------------------------------
-
 func BenchmarkChain10(b *testing.B) {
 	// Build 10 empty (passthrough) middlewares.
 	mws := make([]func(http.Handler) http.Handler, 10)
@@ -204,10 +195,7 @@ func BenchmarkChain10(b *testing.B) {
 	}
 }
 
-// ---------------------------------------------------------------------------
 // Utility
-// ---------------------------------------------------------------------------
-
 func slicesEqual(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

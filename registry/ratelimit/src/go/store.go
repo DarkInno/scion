@@ -6,10 +6,7 @@ import (
 	"time"
 )
 
-// ============================================================================
 // Constants
-// ============================================================================
-
 const (
 	// DefaultMaxBuckets is the default maximum number of buckets in a MemoryStore.
 	// This prevents unbounded memory growth from unique keys.
@@ -20,10 +17,7 @@ const (
 	MaxKeyLength = 256
 )
 
-// ============================================================================
 // Errors
-// ============================================================================
-
 var (
 	ErrInvalidRate     = errors.New("ratelimit: rate must be greater than 0")
 	ErrInvalidWindow   = errors.New("ratelimit: window must be greater than 0")
@@ -32,10 +26,7 @@ var (
 	ErrNilLimiter      = errors.New("ratelimit: limiter must not be nil")
 )
 
-// ============================================================================
 // Result
-// ============================================================================
-
 // Result represents the outcome of a rate limit check.
 type Result struct {
 	// Allowed indicates whether the request is permitted.
@@ -51,10 +42,7 @@ type Result struct {
 	RetryAfter int
 }
 
-// ============================================================================
 // Store Interface
-// ============================================================================
-
 // Store defines the interface for rate limit state storage.
 // All methods must be safe for concurrent use.
 //
@@ -71,10 +59,7 @@ type Store interface {
 	Delete(key string)
 }
 
-// ============================================================================
 // MemoryStore with LRU Eviction
-// ============================================================================
-
 // lruEntry is a node in the doubly-linked list used for LRU tracking.
 type lruEntry struct {
 	key   string
@@ -222,10 +207,7 @@ func (s *MemoryStore) evictTail() {
 	delete(s.buckets, key)
 }
 
-// ============================================================================
 // Helpers
-// ============================================================================
-
 // ceilDivSeconds converts a duration in nanoseconds to seconds using ceiling
 // division, with a minimum return value of 1.
 func ceilDivSeconds(nanos int64) int {
