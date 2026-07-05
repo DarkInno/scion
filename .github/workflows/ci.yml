@@ -1,0 +1,175 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+# Cancel in-progress runs for the same branch when a new commit is pushed.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ===========================================================================
+  # Job 1: gofmt — enforce Go code formatting
+  # ===========================================================================
+  gofmt:
+    name: gofmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Check formatting
+        run: |
+          # Collect all .go files across all modules.
+          unformatted=$(find registry -name '*.go' -type f -exec gofmt -l {} +)
+          if [ -n "$unformatted" ]; then
+            echo "::error::The following files are not gofmt-clean:"
+            echo "$unformatted"
+            echo ""
+            echo "Run 'gofmt -w .' in each module directory to fix."
+            exit 1
+          fi
+          echo "All Go files are gofmt-clean."
+
+  # ===========================================================================
+  # Job 2: go vet — static analysis
+  # ===========================================================================
+  go-vet:
+    name: go vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Run go vet on all modules
+        run: |
+          set -e
+          modules=(
+            middleware
+            auth
+            crud
+            rbac
+            ratelimit
+            validation
+            file-upload
+            health
+            cache
+            pagination
+            mail
+          )
+          for mod in "${modules[@]}"; do
+            echo "::group::go vet: $mod"
+            (cd "registry/$mod/src/go" && go vet ./...)
+            echo "::endgroup::"
+          done
+          echo "All modules passed go vet."
+
+  # ===========================================================================
+  # Job 3: go test — run all tests
+  # ===========================================================================
+  go-test:
+    name: go test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Run tests for all modules
+        run: |
+          set -e
+          modules=(
+            middleware
+            auth
+            crud
+            rbac
+            ratelimit
+            validation
+            file-upload
+            health
+            cache
+            pagination
+            mail
+          )
+          failed=0
+          for mod in "${modules[@]}"; do
+            echo "::group::go test: $mod"
+            if ! (cd "registry/$mod/src/go" && go test -count=1 -timeout 10m ./...); then
+              echo "::error::Tests failed for module: $mod"
+              failed=1
+            fi
+            echo "::endgroup::"
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::One or more modules have failing tests."
+            exit 1
+          fi
+          echo "All modules passed tests."
+
+  # ===========================================================================
+  # Job 4: Module consistency — verify go.mod files are correct
+  # ===========================================================================
+  module-check:
+    name: module check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Verify each module compiles
+        run: |
+          set -e
+          modules=(
+            middleware
+            auth
+            crud
+            rbac
+            ratelimit
+            validation
+            file-upload
+            health
+            cache
+            pagination
+            mail
+          )
+          for mod in "${modules[@]}"; do
+            echo "::group::go build: $mod"
+            (cd "registry/$mod/src/go" && go build ./...)
+            echo "::endgroup::"
+          done
+          echo "All modules compile successfully."
+
+  # ===========================================================================
+  # Summary job — required for branch protection
+  # ===========================================================================
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [gofmt, go-vet, go-test, module-check]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [[ "${{ needs.gofmt.result }}" != "success" || \
+                "${{ needs.go-vet.result }}" != "success" || \
+                "${{ needs.go-test.result }}" != "success" || \
+                "${{ needs.module-check.result }}" != "success" ]]; then
+            echo "::error::CI failed. One or more checks did not pass."
+            exit 1
+          fi
+          echo "All CI checks passed."

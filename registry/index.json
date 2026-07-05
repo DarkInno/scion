@@ -1,0 +1,106 @@
+﻿{
+  "name": "Scion",
+  "version": "0.1.0",
+  "description": "Backend pattern registry",
+  "patterns": [
+    {
+      "id": "auth",
+      "name": "Authentication",
+      "description": "JWT-based email/password auth with rate limiting and bcrypt",
+      "path": "registry/auth",
+      "languages": ["go"],
+      "frameworks": ["gin", "echo", "net/http"],
+      "tags": ["auth", "jwt", "bcrypt", "security", "rate-limiting"]
+    },
+    {
+      "id": "crud",
+      "name": "CRUD Operations",
+      "description": "Generic CRUD endpoints with pagination, filtering, sorting, and validation",
+      "path": "registry/crud",
+      "languages": ["go"],
+      "frameworks": ["gin", "echo", "net/http"],
+      "tags": ["crud", "api", "database", "pagination"]
+    },
+    {
+      "id": "middleware",
+      "name": "HTTP Middleware",
+      "description": "Recovery, CORS, request ID, logging, timeout, body limit, proxy, tracing, debug",
+      "path": "registry/middleware",
+      "languages": ["go"],
+      "frameworks": ["net/http", "gin", "echo"],
+      "tags": ["middleware", "cors", "logging", "recovery", "timeout", "tracing", "security"]
+    },
+    {
+      "id": "rbac",
+      "name": "Role-Based Access Control",
+      "description": "Hierarchical RBAC with wildcard permissions and HTTP middleware",
+      "path": "registry/rbac",
+      "languages": ["go"],
+      "frameworks": ["net/http", "gin", "echo"],
+      "tags": ["rbac", "authorization", "permissions", "security", "middleware"]
+    },
+    {
+      "id": "ratelimit",
+      "name": "Rate Limiting",
+      "description": "Fixed window, sliding window, and token bucket rate limiters with middleware",
+      "path": "registry/ratelimit",
+      "languages": ["go"],
+      "frameworks": ["net/http", "gin", "echo"],
+      "tags": ["rate-limiting", "middleware", "security", "token-bucket", "sliding-window"]
+    },
+    {
+      "id": "validation",
+      "name": "Request Validation",
+      "description": "Chainable validation builder with JSON, query, and form support",
+      "path": "registry/validation",
+      "languages": ["go"],
+      "frameworks": ["net/http", "gin", "echo"],
+      "tags": ["validation", "security", "middleware", "input-sanitization"]
+    },
+    {
+      "id": "file-upload",
+      "name": "File Upload",
+      "description": "Secure file upload with magic bytes validation, size limits, and path traversal prevention",
+      "path": "registry/file-upload",
+      "languages": ["go"],
+      "frameworks": ["net/http", "gin", "echo"],
+      "tags": ["upload", "files", "security", "magic-bytes", "mime-validation"]
+    },
+    {
+      "id": "health",
+      "name": "Health Checks",
+      "description": "Liveness and readiness probes with HTTP, TCP, and custom checks, SSRF protection",
+      "path": "registry/health",
+      "languages": ["go"],
+      "frameworks": ["net/http", "gin", "echo"],
+      "tags": ["health", "readiness", "liveness", "monitoring", "ssrf-protection"]
+    },
+    {
+      "id": "cache",
+      "name": "In-Memory Cache",
+      "description": "Generic TTL + LRU cache with background cleanup and stats",
+      "path": "registry/cache",
+      "languages": ["go"],
+      "frameworks": [],
+      "tags": ["cache", "lru", "ttl", "performance"]
+    },
+    {
+      "id": "pagination",
+      "name": "Pagination",
+      "description": "Offset/limit and cursor-based pagination with middleware",
+      "path": "registry/pagination",
+      "languages": ["go"],
+      "frameworks": ["net/http", "gin", "echo"],
+      "tags": ["pagination", "cursor", "offset", "api"]
+    },
+    {
+      "id": "mail",
+      "name": "Email Sender",
+      "description": "SMTP email with templates, attachments, async queue, TLS, and header injection protection",
+      "path": "registry/mail",
+      "languages": ["go"],
+      "frameworks": [],
+      "tags": ["email", "smtp", "templates", "tls", "security"]
+    }
+  ]
+}
