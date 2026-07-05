@@ -552,29 +552,34 @@ func TestKeyByIP(t *testing.T) {
 			want:       "192.168.1.1",
 		},
 		{
-			name:       "X-Forwarded-For single",
+			name:       "X-Forwarded-For ignored",
 			remoteAddr: "10.0.0.1:80",
 			xff:        "203.0.113.5",
-			want:       "203.0.113.5",
+			want:       "10.0.0.1",
 		},
 		{
-			name:       "X-Forwarded-For multiple",
+			name:       "X-Forwarded-For multiple ignored",
 			remoteAddr: "10.0.0.1:80",
 			xff:        "203.0.113.5, 70.41.3.18, 150.172.238.178",
-			want:       "203.0.113.5",
+			want:       "10.0.0.1",
 		},
 		{
-			name:       "X-Real-IP",
+			name:       "X-Real-IP ignored",
 			remoteAddr: "10.0.0.1:80",
 			xri:        "198.51.100.3",
-			want:       "198.51.100.3",
+			want:       "10.0.0.1",
 		},
 		{
-			name:       "X-Forwarded-For takes precedence over X-Real-IP",
+			name:       "spoofed headers ignored",
 			remoteAddr: "10.0.0.1:80",
 			xff:        "203.0.113.5",
 			xri:        "198.51.100.3",
-			want:       "203.0.113.5",
+			want:       "10.0.0.1",
+		},
+		{
+			name:       "RemoteAddr without port",
+			remoteAddr: "10.0.0.1",
+			want:       "10.0.0.1",
 		},
 	}
 
@@ -592,6 +597,23 @@ func TestKeyByIP(t *testing.T) {
 				t.Errorf("KeyByIP() = %q, want %q", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestMiddlewareNormalizesUnsafeKeys(t *testing.T) {
+	store := NewMemoryStore()
+	limiter, _ := NewFixedWindowLimiter(store, 1, time.Second)
+	mw := Middleware(limiter, func(r *http.Request) string {
+		return "bad\r\nkey"
+	})
+	handler := mw(okHandler())
+
+	handler.ServeHTTP(httptest.NewRecorder(), newRequestWithIP("1.1.1.1:80"))
+	if _, ok := store.Get("bad\r\nkey"); ok {
+		t.Fatal("unsafe key should not be stored")
+	}
+	if _, ok := store.Get("anonymous"); !ok {
+		t.Fatal("unsafe key should fall back to anonymous")
 	}
 }
 

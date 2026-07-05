@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/joho/godotenv"
 )
 
 // Config holds CRUD-related configuration.
@@ -16,8 +14,6 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	_ = godotenv.Load()
-
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
 		return nil, fmt.Errorf("DB_URL is required")

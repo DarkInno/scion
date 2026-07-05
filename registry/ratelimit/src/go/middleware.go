@@ -45,7 +45,7 @@ type rateLimitResponse struct {
 //
 // On every request:
 //  1. The key is extracted using keyFunc (defaults to KeyByIP if nil).
-//  2. Empty keys are replaced with "anonymous".
+//  2. Empty keys and keys containing CRLF/null bytes are replaced with "anonymous".
 //  3. Keys exceeding MaxKeyLength are truncated.
 //  4. The limiter checks if the request is allowed.
 //  5. Rate limit headers are set on all responses.
@@ -61,13 +61,7 @@ func Middleware(limiter Limiter, keyFunc KeyFunc) func(http.Handler) http.Handle
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Extract and sanitize the key
-			key := keyFunc(r)
-			if key == "" {
-				key = "anonymous"
-			}
-			if len(key) > MaxKeyLength {
-				key = key[:MaxKeyLength]
-			}
+			key := normalizeKey(keyFunc(r))
 
 			// Check the rate limit
 			result := limiter.Allow(key)
@@ -97,24 +91,23 @@ func Middleware(limiter Limiter, keyFunc KeyFunc) func(http.Handler) http.Handle
 }
 
 // Key Functions
-// KeyByIP extracts the client IP address from the request.
-// It checks the following in order:
-//  1. X-Forwarded-For header (first IP in the list)
-//  2. X-Real-IP header
-//  3. RemoteAddr (host:port -> host)
+// normalizeKey bounds and validates a limiter key before it reaches the store.
+func normalizeKey(key string) string {
+	if key == "" || strings.ContainsAny(key, "\r\n\x00") {
+		return "anonymous"
+	}
+	if len(key) > MaxKeyLength {
+		return key[:MaxKeyLength]
+	}
+	return key
+}
+
+// KeyByIP extracts the client IP address from r.RemoteAddr only.
+//
+// It deliberately does not trust X-Forwarded-For or X-Real-IP. Those headers
+// are client-controlled unless a deployment has a verified trusted-proxy layer,
+// and using them here would let attackers spoof rate-limit buckets.
 func KeyByIP(r *http.Request) string {
-	// Check X-Forwarded-For (may contain a comma-separated list of IPs)
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		if idx := strings.IndexByte(xff, ','); idx != -1 {
-			return strings.TrimSpace(xff[:idx])
-		}
-		return strings.TrimSpace(xff)
-	}
-	// Check X-Real-IP
-	if xri := r.Header.Get("X-Real-IP"); xri != "" {
-		return strings.TrimSpace(xri)
-	}
-	// Fall back to RemoteAddr
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr

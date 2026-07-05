@@ -1,4 +1,5 @@
-﻿{
+{
+  "schemaVersion": 1,
   "name": "Scion",
   "version": "0.1.0",
   "description": "Backend pattern registry",
@@ -10,7 +11,15 @@
       "path": "registry/auth",
       "languages": ["go"],
       "frameworks": ["gin", "echo", "net/http"],
-      "tags": ["auth", "jwt", "bcrypt", "security", "rate-limiting"]
+      "tags": ["auth", "jwt", "bcrypt", "security", "rate-limiting"],
+      "version": "0.1.0",
+      "package": "auth",
+      "source": "registry/auth/src/go",
+      "defaultTarget": "internal/auth",
+      "stdlibOnly": false,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "external-deps"
     },
     {
       "id": "crud",
@@ -19,7 +28,15 @@
       "path": "registry/crud",
       "languages": ["go"],
       "frameworks": ["gin", "echo", "net/http"],
-      "tags": ["crud", "api", "database", "pagination"]
+      "tags": ["crud", "api", "database", "pagination"],
+      "version": "0.1.0",
+      "package": "crud",
+      "source": "registry/crud/src/go",
+      "defaultTarget": "internal/crud",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "middleware",
@@ -28,7 +45,15 @@
       "path": "registry/middleware",
       "languages": ["go"],
       "frameworks": ["net/http", "gin", "echo"],
-      "tags": ["middleware", "cors", "logging", "recovery", "timeout", "tracing", "security"]
+      "tags": ["middleware", "cors", "logging", "recovery", "timeout", "tracing", "security"],
+      "version": "0.1.0",
+      "package": "middleware",
+      "source": "registry/middleware/src/go",
+      "defaultTarget": "internal/middleware",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "rbac",
@@ -37,7 +62,15 @@
       "path": "registry/rbac",
       "languages": ["go"],
       "frameworks": ["net/http", "gin", "echo"],
-      "tags": ["rbac", "authorization", "permissions", "security", "middleware"]
+      "tags": ["rbac", "authorization", "permissions", "security", "middleware"],
+      "version": "0.1.0",
+      "package": "rbac",
+      "source": "registry/rbac/src/go",
+      "defaultTarget": "internal/rbac",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "ratelimit",
@@ -46,7 +79,15 @@
       "path": "registry/ratelimit",
       "languages": ["go"],
       "frameworks": ["net/http", "gin", "echo"],
-      "tags": ["rate-limiting", "middleware", "security", "token-bucket", "sliding-window"]
+      "tags": ["rate-limiting", "middleware", "security", "token-bucket", "sliding-window"],
+      "version": "0.1.0",
+      "package": "ratelimit",
+      "source": "registry/ratelimit/src/go",
+      "defaultTarget": "internal/ratelimit",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "validation",
@@ -55,7 +96,15 @@
       "path": "registry/validation",
       "languages": ["go"],
       "frameworks": ["net/http", "gin", "echo"],
-      "tags": ["validation", "security", "middleware", "input-sanitization"]
+      "tags": ["validation", "security", "middleware", "input-sanitization"],
+      "version": "0.1.0",
+      "package": "validation",
+      "source": "registry/validation/src/go",
+      "defaultTarget": "internal/validation",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "file-upload",
@@ -64,7 +113,15 @@
       "path": "registry/file-upload",
       "languages": ["go"],
       "frameworks": ["net/http", "gin", "echo"],
-      "tags": ["upload", "files", "security", "magic-bytes", "mime-validation"]
+      "tags": ["upload", "files", "security", "magic-bytes", "mime-validation"],
+      "version": "0.1.0",
+      "package": "fileupload",
+      "source": "registry/file-upload/src/go",
+      "defaultTarget": "internal/fileupload",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "health",
@@ -73,7 +130,15 @@
       "path": "registry/health",
       "languages": ["go"],
       "frameworks": ["net/http", "gin", "echo"],
-      "tags": ["health", "readiness", "liveness", "monitoring", "ssrf-protection"]
+      "tags": ["health", "readiness", "liveness", "monitoring", "ssrf-protection"],
+      "version": "0.1.0",
+      "package": "health",
+      "source": "registry/health/src/go",
+      "defaultTarget": "internal/health",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "cache",
@@ -82,7 +147,15 @@
       "path": "registry/cache",
       "languages": ["go"],
       "frameworks": [],
-      "tags": ["cache", "lru", "ttl", "performance"]
+      "tags": ["cache", "lru", "ttl", "performance"],
+      "version": "0.1.0",
+      "package": "cache",
+      "source": "registry/cache/src/go",
+      "defaultTarget": "internal/cache",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "pagination",
@@ -91,7 +164,15 @@
       "path": "registry/pagination",
       "languages": ["go"],
       "frameworks": ["net/http", "gin", "echo"],
-      "tags": ["pagination", "cursor", "offset", "api"]
+      "tags": ["pagination", "cursor", "offset", "api"],
+      "version": "0.1.0",
+      "package": "pagination",
+      "source": "registry/pagination/src/go",
+      "defaultTarget": "internal/pagination",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     },
     {
       "id": "mail",
@@ -100,7 +181,15 @@
       "path": "registry/mail",
       "languages": ["go"],
       "frameworks": [],
-      "tags": ["email", "smtp", "templates", "tls", "security"]
+      "tags": ["email", "smtp", "templates", "tls", "security"],
+      "version": "0.1.0",
+      "package": "mail",
+      "source": "registry/mail/src/go",
+      "defaultTarget": "internal/mail",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
     }
   ]
 }

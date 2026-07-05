@@ -53,7 +53,7 @@ Add your module to `registry/index.json`.
 ## Code Standards
 
 - Go 1.22+ with generics
-- Zero external dependencies — standard library only
+- Standard library only by default; external dependencies require an explicit `stdlibOnly:false` registry entry and security/correctness justification
 - `gofmt` formatting
 - `go vet` must pass
 - Middleware signature: `func(http.Handler) http.Handler`

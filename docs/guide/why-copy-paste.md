@@ -7,7 +7,7 @@ Backend modules (auth, CRUD, file upload, rate limiting) share 80% of their skel
 - You need to customize business logic deep inside the module
 - You want to own the code, not be locked to upstream versions
 - Your AI coding assistant works better with code it can read and modify directly
-- No dependency hell — zero external dependencies, Go standard library only
+- No dependency hell — standard library by default, with declared security exceptions
 
 ## The Solution
 
@@ -19,7 +19,7 @@ Scion provides copy-paste code modules. Instead of installing a framework or pul
 
 Every line is yours after copying. No upstream lock-in. No version conflicts. No waiting for maintainers to merge your PR.
 
-### Zero Dependencies
+### Explicit Dependencies
 
 Each module uses only the Go standard library. No `go.sum` bloat. No transitive dependency vulnerabilities.
 
@@ -53,7 +53,7 @@ Every module includes functional tests and penetration test cases. Run `go test 
 - You want to own every line of code
 - You need deep customization
 - You're building with AI coding assistants
-- You want zero external dependencies
+- You want no hidden transitive dependencies
 
 ## When NOT to Use Scion
 

@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Scion
   text: 复制粘贴 Go 后端模块
-  tagline: 零依赖、安全优先、AI友好。复制生产就绪的代码到你的项目中。
+  tagline: 显式依赖、安全优先、AI友好。复制生产就绪的代码到你的项目中。
   actions:
     - theme: brand
       text: 快速开始
@@ -84,6 +84,6 @@ cp -r registry/auth/src/go/* yourproject/internal/auth/
 后端模块在不同项目间共享 80% 的骨架代码。与其安装框架，不如复制生产就绪的模块，拥有每一行代码。
 
 - **代码所有权** — 复制后每一行都是你的
-- **零依赖** — 仅使用 Go 标准库
+- **显式依赖** — 默认仅使用标准库；安全例外会声明
 - **安全优先** — 内置输入验证、限流、注入防护
 - **AI友好** — `__llms__.md` 文件让 AI 快速理解模块

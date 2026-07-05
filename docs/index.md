@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Scion
   text: Copy-Paste Go Backend Modules
-  tagline: Zero dependencies, security-first, AI-friendly. Copy production-ready code into your project.
+  tagline: Explicit dependencies, security-first, AI-friendly. Copy production-ready code into your project.
   actions:
     - theme: brand
       text: Get Started
@@ -84,6 +84,6 @@ cp -r registry/auth/src/go/* yourproject/internal/auth/
 Backend modules share 80% of their skeleton across projects. Instead of installing a framework, copy pre-built, production-ready modules and own every line of code.
 
 - **Code ownership** — every line is yours after copying
-- **Zero dependencies** — Go standard library only
+- **Explicit dependencies** — standard library by default; security exceptions are declared
 - **Security-first** — input validation, rate limiting, injection prevention built in
 - **AI-friendly** — `__llms__.md` files let AI assistants understand modules quickly
