@@ -6,12 +6,12 @@
 
 ## Project Description
 
-Scion is a copy-paste code library for Go backend development. It contains 11 self-contained modules in `registry/` — each is a standalone Go package with zero external dependencies (Go standard library only). Modules are meant to be copied into a user's project and adapted, not imported as a dependency.
+Scion is a copy-paste code library for Go backend development. It contains 11 self-contained modules in `registry/` — each is a standalone Go package. Modules are standard-library only by default; security-sensitive modules may be declared as `stdlibOnly:false` in `registry/index.json` and copied in standalone mode. Modules are meant to be copied into a user's project and adapted, not imported as a dependency.
 
 ## Coding Standards
 
 - Go 1.22+ with generics
-- Zero external dependencies — standard library only
+- Standard library only by default; declared `stdlibOnly:false` modules may use mature security libraries
 - `gofmt` formatting is mandatory
 - `go vet` must pass with zero warnings
 - Middleware signature: `func(http.Handler) http.Handler`
@@ -69,7 +69,7 @@ foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Po
 
 ## Key Constraints
 
-- Do NOT add external dependencies to any module's `go.mod`
+- Do NOT add external dependencies to any module's `go.mod` unless the module is explicitly marked `stdlibOnly:false` in `registry/index.json` and the dependency is justified for security or correctness
 - Do NOT use `panic` in HTTP handlers — return errors
 - Do NOT trust client headers (`Content-Type`, `X-Forwarded-For`, `X-Real-Ip`)
 - Do NOT use `strings.Split` for header parsing — use `strings.SplitN` with a limit
@@ -89,9 +89,9 @@ You are working on Scion, a copy-paste code library for Go backend development.
 Project location: <path-to-scion>
 
 Architecture:
-- 11 modules in registry/ — each is a standalone Go package, zero external deps
+- 11 modules in registry/ — each is a standalone Go package
 - Module path pattern: registry/<module>/src/go/
-- Go 1.22+, standard library only, gofmt mandatory
+- Go 1.22+, standard library by default, gofmt mandatory
 
 Security rules (non-negotiable):
 1. Reject CRLF (\r\n) and null bytes (\x00) in all user inputs

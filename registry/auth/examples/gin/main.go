@@ -1,11 +1,11 @@
+//go:build ignore
+
 package main
 
 import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 // auth is the copied Scion auth module.
@@ -19,8 +19,6 @@ import (
 // 3. Run `go mod tidy`
 
 func main() {
-	_ = godotenv.Load()
-
 	if os.Getenv("JWT_SECRET") == "" {
 		os.Setenv("JWT_SECRET", "this-is-a-32-character-secret-key-for-dev")
 	}

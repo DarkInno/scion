@@ -1,6 +1,6 @@
 # Modules Overview
 
-Scion provides 11 production-ready, copy-paste Go modules. Each module is self-contained with zero external dependencies.
+Scion provides 11 production-ready, copy-paste Go modules. Each module is self-contained. Modules are standard-library only by default; declared security exceptions are marked in the registry.
 
 ## Available Modules
 
@@ -53,4 +53,4 @@ go test -v ./...
 
 ## Dependencies
 
-All modules use only the Go standard library. No external dependencies required.
+Modules use only the Go standard library by default. Declared exceptions, such as auth, copy their own `go.mod` in standalone mode.

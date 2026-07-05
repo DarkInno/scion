@@ -36,7 +36,7 @@ JWT-based email/password authentication with optional OAuth2 (Google, GitHub).
 - Optional: customize `RoutePrefix` before `RegisterRoutes()`
 
 ## Deps (Go)
-golang-jwt/jwt/v5, golang.org/x/crypto/bcrypt, joho/godotenv
+github.com/golang-jwt/jwt/v5, golang.org/x/crypto/bcrypt
 
 ## Deps (Python)
 SQLAlchemy 2.0, python-jose, passlib

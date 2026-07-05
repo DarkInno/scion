@@ -53,7 +53,7 @@ go test -v ./...
 ## 代码标准
 
 - Go 1.22+ 支持泛型
-- 零外部依赖 — 仅标准库
+- 默认仅使用标准库；外部依赖必须有显式的 `stdlibOnly:false` 注册表声明，并说明安全或正确性理由
 - `gofmt` 格式化
 - `go vet` 必须通过
 - 中间件签名：`func(http.Handler) http.Handler`

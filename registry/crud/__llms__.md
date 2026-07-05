@@ -22,7 +22,7 @@ Generic CRUD endpoints with pagination, filtering, and sorting.
 - src/routes.py — register CRUD routes with your model
 
 ## Deps (Go)
-joho/godotenv
+Go standard library only
 
 ## Deps (Python)
 SQLAlchemy 2.0, Pydantic

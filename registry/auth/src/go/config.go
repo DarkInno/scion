@@ -5,8 +5,6 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -31,8 +29,6 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	_ = godotenv.Load() // optional: load .env file if present
-
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		return nil, fmt.Errorf("JWT_SECRET is required")

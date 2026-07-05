@@ -1,3 +1,5 @@
+//go:build ignore
+
 package main
 
 import (
@@ -5,8 +7,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 // Product represents a sample entity.
@@ -70,8 +70,6 @@ func (s *InMemoryStore) Delete(id uint) error {
 }
 
 func main() {
-	_ = godotenv.Load()
-
 	if os.Getenv("DB_URL") == "" {
 		os.Setenv("DB_URL", "sqlite://dev.db")
 	}

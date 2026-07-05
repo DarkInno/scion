@@ -13,22 +13,31 @@ Backend modules (auth, CRUD, file upload, rate limiting) share 80% of their skel
 - You need to customize business logic deep inside the module
 - You want to own the code, not be locked to upstream versions
 - Your AI coding assistant works better with code it can read and modify directly
-- No dependency hell — zero external dependencies, Go standard library only
+- No dependency hell — standard library by default, with declared security exceptions
 
 ## Quick Start
 
 ```bash
+# 1. Install the source-template copier
+go install github.com/DarkInno/scion/cmd/scion@latest
+
+# 2. Copy a zero-dependency module into your project
+scion add cache --to internal/cache
+
+# 3. Inspect local changes against the embedded template later
+scion diff cache --target internal/cache
+```
+
+Scion's CLI copies source files and writes `.scion-module.json` metadata for later comparison. It never edits your `go.mod` automatically. Modules marked `stdlibOnly=false` must be copied with `--standalone` so their `go.mod`/`go.sum` are explicit.
+
+Manual copy still works:
+
+```bash
 # 1. Copy a module into your project
-cp -r registry/auth/src/go/* yourproject/internal/auth/
+cp -r registry/cache/src/go/*.go yourproject/internal/cache/
 
-# 2. Adapt the configuration
-#    Edit config.go: set JWT secret, database URL, etc.
-
-# 3. Implement the store interface
-#    type UserStore interface { ... }  // your DB layer
-
-# 4. Wire up routes
-#    See registry/auth/examples/gin/main.go
+# 2. Adapt the package to your project
+#    Rename, trim tests, or wire it into your service as needed.
 ```
 
 ## Available Modules
@@ -79,7 +88,7 @@ scion/
 ## Design Principles
 
 1. **Code ownership** — every line is yours after copying. No upstream lock-in.
-2. **Self-contained** — each module works independently, zero external dependencies.
+2. **Self-contained** — each module works independently; external dependencies are allowed only for declared security exceptions.
 3. **Framework-agnostic** — uses Go standard `net/http`, adaptable to Gin/Echo/etc.
 4. **Security-first** — input validation, rate limiting, injection prevention built in.
 5. **AI-friendly** — `__llms__.md` files let AI assistants understand modules in ~200 tokens.
@@ -89,8 +98,14 @@ scion/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/scion.git
+git clone https://github.com/DarkInno/scion.git
 cd scion
+
+# Regenerate the embedded CLI bundle after registry changes
+go run ./internal/cmd/build-bundle
+
+# Test the root CLI
+go test ./cmd/... ./internal/...
 
 # Run tests for a specific module
 cd registry/auth/src/go && go test -v ./...
