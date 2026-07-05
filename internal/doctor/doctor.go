@@ -173,6 +173,7 @@ func checkManifestFreshness(reg *registry.Bundle, root string, add func(string, 
 			add("error", file.Module, "bundle is stale: missing "+path)
 			continue
 		}
+		data = registry.CanonicalFileBytes(path, data)
 		sum := sha256.Sum256(data)
 		if hex.EncodeToString(sum[:]) != file.SHA256 {
 			add("error", file.Module, "bundle is stale: hash mismatch for "+path)

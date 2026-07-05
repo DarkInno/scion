@@ -289,9 +289,11 @@ func (a *App) runVersion(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 
+	currentVersion := version.Current()
+	currentCommit := version.CurrentCommit()
 	out := map[string]string{
-		"version":         version.Version,
-		"commit":          version.Commit,
+		"version":         currentVersion,
+		"commit":          currentCommit,
 		"registryVersion": a.reg.Index.Version,
 		"bundleHash":      a.reg.Manifest.BundleHash,
 	}
@@ -299,8 +301,8 @@ func (a *App) runVersion(args []string, stdout, stderr io.Writer) int {
 		_ = json.NewEncoder(stdout).Encode(out)
 		return 0
 	}
-	_, _ = fmt.Fprintf(stdout, "scion %s\n", version.Version)
-	_, _ = fmt.Fprintf(stdout, "commit: %s\n", version.Commit)
+	_, _ = fmt.Fprintf(stdout, "scion %s\n", currentVersion)
+	_, _ = fmt.Fprintf(stdout, "commit: %s\n", currentCommit)
 	_, _ = fmt.Fprintf(stdout, "registry: %s\n", a.reg.Index.Version)
 	_, _ = fmt.Fprintf(stdout, "bundle: %s\n", a.reg.Manifest.BundleHash)
 	return 0
