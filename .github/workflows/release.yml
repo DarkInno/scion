@@ -1,0 +1,196 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, for example v0.1.2"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.tag }}"
+          else
+            tag="${{ github.ref_name }}"
+          fi
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release tag must match vMAJOR.MINOR.PATCH, got: $tag"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Resolve release commit
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.release.outputs.tag }}"
+          sha="$(git rev-list -n 1 "$tag")"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure release does not already exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.release.outputs.tag }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "::error::Release already exists: $tag"
+            exit 1
+          fi
+
+      - name: Run release gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "::group::root tests"
+          go test -count=1 -timeout 10m ./cmd/... ./internal/...
+          echo "::endgroup::"
+
+          echo "::group::root vet"
+          go vet ./cmd/... ./internal/...
+          echo "::endgroup::"
+
+          echo "::group::doctor strict"
+          go run ./cmd/scion doctor --strict
+          echo "::endgroup::"
+
+          echo "::group::bundle freshness"
+          go run ./internal/cmd/build-bundle
+          git diff --exit-code -- internal/bundle
+          echo "::endgroup::"
+
+      - name: Build release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.release.outputs.tag }}"
+          sha="${{ steps.commit.outputs.sha }}"
+          ldflags="-s -w -X github.com/DarkInno/scion/internal/version.Version=$tag -X github.com/DarkInno/scion/internal/version.Commit=$sha"
+
+          rm -rf dist
+          mkdir -p dist
+
+          targets=(
+            "linux amd64 tar.gz"
+            "linux arm64 tar.gz"
+            "darwin amd64 tar.gz"
+            "darwin arm64 tar.gz"
+            "windows amd64 zip"
+            "windows arm64 zip"
+          )
+
+          for target in "${targets[@]}"; do
+            read -r goos goarch archive <<< "$target"
+            name="scion_${tag}_${goos}_${goarch}"
+            stage="dist/$name"
+            mkdir -p "$stage"
+
+            ext=""
+            if [ "$goos" = "windows" ]; then
+              ext=".exe"
+            fi
+
+            echo "::group::build $goos/$goarch"
+            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" \
+              go build -trimpath -ldflags "$ldflags" -o "$stage/scion$ext" ./cmd/scion
+            cp LICENSE "$stage/LICENSE"
+            cp README.md "$stage/README.md"
+
+            if [ "$archive" = "zip" ]; then
+              (cd "$stage" && zip -q -r "../$name.zip" .)
+            else
+              tar -czf "dist/$name.tar.gz" -C "$stage" .
+            fi
+            echo "::endgroup::"
+          done
+
+          (cd dist && sha256sum scion_*.tar.gz scion_*.zip > SHA256SUMS)
+
+      - name: Verify built binary version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.release.outputs.tag }}"
+          version="$(./dist/scion_${tag}_linux_amd64/scion version)"
+          echo "$version"
+          grep -q "scion $tag" <<< "$version"
+          grep -q "commit: ${{ steps.commit.outputs.sha }}" <<< "$version"
+
+      - name: Write release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.release.outputs.tag }}"
+          cat > release-notes.md <<EOF
+          ## Install
+
+          \`\`\`bash
+          go install github.com/DarkInno/scion/cmd/scion@$tag
+          \`\`\`
+
+          Or download a platform binary below and verify it with \`SHA256SUMS\`.
+
+          ## Verify
+
+          \`\`\`bash
+          scion version
+          scion list
+          scion add cache --to internal/cache --dry-run
+          \`\`\`
+
+          ## Assets
+
+          - macOS: amd64, arm64
+          - Linux: amd64, arm64
+          - Windows: amd64, arm64
+          - SHA256 checksums: \`SHA256SUMS\`
+          EOF
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.release.outputs.tag }}"
+          gh release create "$tag" \
+            dist/*.tar.gz \
+            dist/*.zip \
+            dist/SHA256SUMS \
+            --verify-tag \
+            --title "Scion $tag" \
+            --notes-file release-notes.md \
+            --latest

@@ -34,5 +34,5 @@ func CurrentCommit() string {
 			}
 		}
 	}
-	return Commit
+	return "unknown"
 }
