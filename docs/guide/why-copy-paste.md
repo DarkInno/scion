@@ -11,7 +11,7 @@ Backend modules (auth, CRUD, file upload, rate limiting) share 80% of their skel
 
 ## The Solution
 
-Scion provides copy-paste code modules. Instead of installing a framework or pulling a dependency, you copy pre-built, production-ready modules into your project and own every line of code.
+Scion provides copy-paste source modules. Instead of installing a framework or depending on Scion at runtime, you copy pre-built, production-ready modules into your project and own every line of code.
 
 ## Benefits
 
@@ -21,7 +21,7 @@ Every line is yours after copying. No upstream lock-in. No version conflicts. No
 
 ### Explicit Dependencies
 
-Each module uses only the Go standard library. No `go.sum` bloat. No transitive dependency vulnerabilities.
+Modules use the Go standard library by default. Security-sensitive exceptions, such as JWT and bcrypt in `auth`, are declared explicitly so there are no hidden transitive dependencies.
 
 ### Security-First
 
@@ -45,7 +45,7 @@ Every module includes functional tests and penetration test cases. Run `go test 
 |----------|------|------|
 | **Package (npm/go)** | Easy to install, auto-updates | Version lock, dependency hell, hard to customize |
 | **Framework (Gin/Echo)** | Consistent API, community | Lock-in, bloat, learning curve |
-| **Copy-paste (Scion)** | Full ownership, zero deps, customizable | Manual updates, more initial setup |
+| **Copy-paste (Scion)** | Full ownership, explicit dependencies, customizable | Manual updates, more initial setup |
 
 ## When to Use Scion
 
@@ -53,7 +53,7 @@ Every module includes functional tests and penetration test cases. Run `go test 
 - You want to own every line of code
 - You need deep customization
 - You're building with AI coding assistants
-- You want no hidden transitive dependencies
+- You want standard-library defaults and no hidden transitive dependencies
 
 ## When NOT to Use Scion
 

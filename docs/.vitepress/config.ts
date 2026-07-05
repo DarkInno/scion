@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   base: '/scion/',
   title: 'Scion',
-  description: 'Copy-paste Go backend modules — zero dependencies, security-first, AI-friendly',
+  description: 'Copy-paste Go backend source templates — security-first, AI-friendly',
   
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/scion/logo.svg' }]
@@ -60,7 +60,7 @@ export default defineConfig({
       label: '中文',
       lang: 'zh-CN',
       title: 'Scion',
-      description: '复制粘贴 Go 后端模块 — 零依赖、安全优先、AI友好',
+      description: '复制粘贴 Go 后端源码模板 — 安全优先、AI友好',
       themeConfig: {
         nav: [
           { text: '指南', link: '/zh/guide/getting-started' },

@@ -1,44 +1,70 @@
 # Scion
 
-> Graft backend patterns into your project. Copy-paste, not install.
+> Graft backend patterns into your project. Copy source, not dependencies.
 
 [English](README.md) | [中文](README_zh.md)
 
-Scion is a copy-paste code library for Go backend development. Instead of installing a framework or pulling a dependency, you copy pre-built, production-ready modules into your project and own every line of code.
-
-## Why Copy-Paste?
-
-Backend modules (auth, CRUD, file upload, rate limiting) share 80% of their skeleton across projects, but the remaining 20% differs in ways that make npm/go packages awkward:
-
-- You need to customize business logic deep inside the module
-- You want to own the code, not be locked to upstream versions
-- Your AI coding assistant works better with code it can read and modify directly
-- No dependency hell — standard library by default, with declared security exceptions
+Scion is a copy-paste code library for Go backend development. It ships production-oriented modules as source templates, so you can copy them into your project, adapt them, and own every line.
 
 ## Quick Start
 
+Install the CLI with Go 1.22 or newer:
+
 ```bash
-# 1. Install the source-template copier
 go install github.com/DarkInno/scion/cmd/scion@latest
+```
 
-# 2. Copy a zero-dependency module into your project
+For reproducible installs, pin a release:
+
+```bash
+go install github.com/DarkInno/scion/cmd/scion@v0.1.2
+```
+
+Make sure your Go bin directory is on `PATH`, then verify the install:
+
+```bash
+scion version
+scion list
+```
+
+Copy a standard-library-only module into your project:
+
+```bash
+scion add cache --to internal/cache --dry-run
 scion add cache --to internal/cache
-
-# 3. Inspect local changes against the embedded template later
 scion diff cache --target internal/cache
 ```
 
-Scion's CLI copies source files and writes `.scion-module.json` metadata for later comparison. It never edits your `go.mod` automatically. Modules marked `stdlibOnly=false` must be copied with `--standalone` so their `go.mod`/`go.sum` are explicit.
-
-Manual copy still works:
+Scion copies source files and writes `.scion-module.json` metadata for later comparison. It never edits your project's `go.mod` automatically. Modules marked `stdlibOnly=false`, such as `auth`, require explicit standalone mode:
 
 ```bash
-# 1. Copy a module into your project
-cp -r registry/cache/src/go/*.go yourproject/internal/cache/
-
-# 2. Adapt the package to your project
-#    Rename, trim tests, or wire it into your service as needed.
+scion add auth --standalone --to internal/auth
 ```
+
+## Binary Downloads
+
+Prebuilt binaries are available on the [GitHub Releases](https://github.com/DarkInno/scion/releases) page for macOS, Linux, and Windows on amd64 and arm64.
+
+Verify a downloaded asset with `SHA256SUMS`:
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+On Windows PowerShell:
+
+```powershell
+Get-FileHash .\scion_v0.1.2_windows_amd64.zip -Algorithm SHA256
+```
+
+## Why Copy-Paste?
+
+Backend modules such as auth, CRUD, file upload, and rate limiting share most of their structure across projects, but the last mile is usually project-specific:
+
+- You need to customize business logic inside the module.
+- You want to own the code instead of being locked to upstream APIs.
+- AI coding assistants work better with source they can read and edit directly.
+- Scion avoids dependency sprawl by default; security-sensitive exceptions are declared explicitly.
 
 ## Available Modules
 
@@ -49,79 +75,84 @@ cp -r registry/cache/src/go/*.go yourproject/internal/cache/
 | [middleware](registry/middleware/) | Recovery, CORS, logging, timeout, etc. | CRLF injection prevention, trusted proxy, body size limit |
 | [rbac](registry/rbac/) | Role-based access control | Wildcard permissions, cycle detection, hierarchy inheritance |
 | [ratelimit](registry/ratelimit/) | Fixed window / sliding window / token bucket | Memory exhaustion protection, LRU eviction, key length limit |
-| [validation](registry/validation/) | Chainable request validation builder | Regex DoS prevention (RE2), null byte/CRLF rejection, panic recovery |
+| [validation](registry/validation/) | Chainable request validation builder | Regex DoS prevention, null byte/CRLF rejection, panic recovery |
 | [file-upload](registry/file-upload/) | Secure file upload handler | Magic bytes validation, path traversal prevention, size limit, rate limiting |
-| [health](registry/health/) | Liveness/readiness probes | SSRF protection (private IP rejection), CRLF injection prevention |
+| [health](registry/health/) | Liveness/readiness probes | SSRF protection, CRLF injection prevention |
 | [cache](registry/cache/) | Generic TTL + LRU cache | Background cleanup, goroutine leak prevention, max entries limit |
 | [pagination](registry/pagination/) | Offset/limit + cursor pagination | Cursor base64 validation, negative offset clamp, max limit enforcement |
 | [mail](registry/mail/) | SMTP email with templates | Header injection prevention, XSS escaping, attachment sanitization, async queue |
 
+## CLI Commands
+
+```bash
+scion list [--json]
+scion info <module> [--json]
+scion add <module> --to <dir> [--dry-run] [--force] [--standalone]
+scion diff <module> --target <dir> [--json]
+scion doctor [--strict] [--json]
+scion version [--json]
+```
+
 ## Project Structure
 
-```
+```text
 scion/
-├── registry/
-│   ├── index.json              # Machine-readable module index
-│   ├── auth/                   # Authentication module
-│   │   ├── __llms__.md         # AI-readable summary (~150 tokens)
-│   │   ├── README.md           # Human-readable adaptation guide
-│   │   ├── src/go/             # Go source code
-│   │   └── examples/gin/       # Minimal runnable example
-│   ├── crud/                   # CRUD operations module
-│   ├── middleware/             # HTTP middleware collection
-│   ├── rbac/                   # Role-based access control
-│   ├── ratelimit/              # Rate limiting algorithms
-│   ├── validation/             # Request validation builder
-│   ├── file-upload/            # File upload handler
-│   ├── health/                 # Health check probes
-│   ├── cache/                  # In-memory cache
-│   ├── pagination/             # Pagination utilities
-│   └── mail/                   # Email sender
-├── docs/
-│   └── getting-started.md      # How to use Scion
-├── AGENTS.md                   # AI coding agent instructions
-├── CONTRIBUTING.md             # How to contribute
-├── LICENSE                     # MIT
-└── llms.txt                    # LLM-friendly project summary
+|-- cmd/scion/              # CLI entrypoint
+|-- internal/               # CLI implementation, bundle reader, doctor checks
+|-- internal/bundle/        # Embedded registry bundle generated from registry/
+|-- registry/
+|   |-- index.json          # Machine-readable module index
+|   |-- auth/               # Authentication module
+|   |-- cache/              # TTL + LRU cache
+|   |-- crud/               # CRUD operations module
+|   |-- file-upload/        # File upload handler
+|   |-- health/             # Health check probes
+|   |-- mail/               # SMTP email sender
+|   |-- middleware/         # HTTP middleware collection
+|   |-- pagination/         # Pagination utilities
+|   |-- ratelimit/          # Rate limiting algorithms
+|   |-- rbac/               # Role-based access control
+|   `-- validation/         # Request validation builder
+|-- docs/                   # VitePress documentation
+|-- AGENTS.md               # AI coding agent instructions
+|-- CONTRIBUTING.md         # Contribution guide
+`-- LICENSE                 # MIT
 ```
-
-## Design Principles
-
-1. **Code ownership** — every line is yours after copying. No upstream lock-in.
-2. **Self-contained** — each module works independently; external dependencies are allowed only for declared security exceptions.
-3. **Framework-agnostic** — uses Go standard `net/http`, adaptable to Gin/Echo/etc.
-4. **Security-first** — input validation, rate limiting, injection prevention built in.
-5. **AI-friendly** — `__llms__.md` files let AI assistants understand modules in ~200 tokens.
-6. **Tested** — every module includes functional tests and penetration test cases.
 
 ## Development
 
 ```bash
-# Clone the repository
 git clone https://github.com/DarkInno/scion.git
 cd scion
 
 # Regenerate the embedded CLI bundle after registry changes
 go run ./internal/cmd/build-bundle
 
-# Test the root CLI
+# Test and vet the root CLI
 go test ./cmd/... ./internal/...
+go vet ./cmd/... ./internal/...
 
-# Run tests for a specific module
-cd registry/auth/src/go && go test -v ./...
-
-# Run tests for all modules
-# (PowerShell)
-$modules = @('middleware','auth','crud','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
-foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
-
-# Format code
-cd registry/auth/src/go && gofmt -w .
+# Run strict registry checks
+go run ./cmd/scion doctor --strict
 ```
 
-## Contributing
+Run tests for all registry modules in PowerShell:
 
-We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding new modules.
+```powershell
+$modules = @('middleware','auth','crud','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
+```
+
+## Releasing
+
+Releases are created from semantic version tags:
+
+```bash
+git tag -a v0.1.2 -m "v0.1.2"
+git push origin v0.1.2
+```
+
+The release workflow verifies the CLI, rebuilds the embedded bundle check, cross-compiles binaries, generates `SHA256SUMS`, and publishes GitHub Release assets.
 
 ## License
 

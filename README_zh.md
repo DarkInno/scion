@@ -1,113 +1,159 @@
 # Scion
 
-> 将后端模式嫁接到你的项目中。复制粘贴，而非安装依赖。
+> 把后端常用模式嫁接到你的项目里：复制源码，而不是引入依赖。
 
 [English](README.md) | [中文](README_zh.md)
 
-Scion 是一个面向 Go 后端开发的复制粘贴代码库。你不需要安装框架或拉取依赖，只需将预构建的生产级模块复制到你的项目中，每一行代码都归你所有。
-
-## 为什么要复制粘贴？
-
-后端模块（认证、CRUD、文件上传、限流）在不同项目中 80% 的骨架是相同的，但剩下的 20% 差异使得 npm/go 包变得别扭：
-
-- 你需要在模块深处自定义业务逻辑
-- 你想拥有代码的所有权，而不是被上游版本锁定
-- 你的 AI 编码助手在能直接阅读和修改代码时表现更好
-- 没有依赖地狱 — 默认仅使用 Go 标准库，安全例外会显式声明
+Scion 是面向 Go 后端开发的复制粘贴式源码模板库。它把常见后端模块以源码模板的形式发布，你可以把模块复制进自己的项目，按业务改造，并最终拥有这些代码。
 
 ## 快速开始
 
+需要 Go 1.22 或更新版本：
+
 ```bash
-# 1. 将模块复制到你的项目中
-cp -r registry/auth/src/go/* yourproject/internal/auth/
-
-# 2. 适配配置
-#    编辑 config.go：设置 JWT 密钥、数据库 URL 等
-
-# 3. 实现 Store 接口
-#    type UserStore interface { ... }  // 你的数据库层
-
-# 4. 注册路由
-#    参考 registry/auth/examples/gin/main.go
+go install github.com/DarkInno/scion/cmd/scion@latest
 ```
+
+如果需要固定版本：
+
+```bash
+go install github.com/DarkInno/scion/cmd/scion@v0.1.2
+```
+
+确认 Go bin 目录已加入 `PATH`，然后验证安装：
+
+```bash
+scion version
+scion list
+```
+
+复制一个仅使用标准库的模块：
+
+```bash
+scion add cache --to internal/cache --dry-run
+scion add cache --to internal/cache
+scion diff cache --target internal/cache
+```
+
+Scion CLI 会复制源码，并写入 `.scion-module.json` 供后续对比使用。它不会自动修改你的 `go.mod`。标记为 `stdlibOnly=false` 的模块，例如 `auth`，需要显式使用 standalone 模式：
+
+```bash
+scion add auth --standalone --to internal/auth
+```
+
+## 二进制下载
+
+预编译二进制可以在 [GitHub Releases](https://github.com/DarkInno/scion/releases) 下载，支持 macOS、Linux、Windows 的 amd64 和 arm64。
+
+使用 `SHA256SUMS` 校验下载文件：
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+Windows PowerShell：
+
+```powershell
+Get-FileHash .\scion_v0.1.2_windows_amd64.zip -Algorithm SHA256
+```
+
+## 为什么是复制粘贴？
+
+认证、CRUD、文件上传、限流等后端模块在不同项目里大部分结构相同，但最后一段总要贴合具体业务：
+
+- 你需要深入模块内部修改业务逻辑。
+- 你想拥有源码，而不是被上游包的 API 设计锁住。
+- AI 编码助手更擅长处理能直接读取和编辑的源码。
+- Scion 默认避免依赖膨胀；安全相关例外会在模块元数据中明确标记。
 
 ## 可用模块
 
 | 模块 | 描述 | 安全特性 |
-|------|------|---------|
-| [auth](registry/auth/) | JWT 邮箱/密码认证 + bcrypt | 限流、用户枚举防护、JTI、aud/iss 验证 |
+|------|------|----------|
+| [auth](registry/auth/) | JWT 邮箱/密码认证 + bcrypt | 限流、用户枚举防护、JTI、aud/iss 校验 |
 | [crud](registry/crud/) | 泛型 CRUD + 分页 | 排序/过滤白名单、SQL 注入防护、分页上限 |
 | [middleware](registry/middleware/) | Recovery、CORS、日志、超时等 | CRLF 注入防护、可信代理、请求体大小限制 |
 | [rbac](registry/rbac/) | 基于角色的访问控制 | 通配符权限、循环检测、层级继承 |
-| [ratelimit](registry/ratelimit/) | 固定窗口/滑动窗口/令牌桶 | 内存耗尽防护、LRU 驱逐、key 长度限制 |
-| [validation](registry/validation/) | 链式请求验证构建器 | 正则 DoS 防护（RE2）、null 字节/CRLF 拒绝、panic 恢复 |
-| [file-upload](registry/file-upload/) | 安全文件上传处理器 | magic bytes 验证、路径穿越防护、大小限制、限流 |
-| [health](registry/health/) | 存活/就绪探针 | SSRF 防护（拒绝内网 IP）、CRLF 注入防护 |
+| [ratelimit](registry/ratelimit/) | 固定窗口 / 滑动窗口 / 令牌桶 | 内存耗尽防护、LRU 驱逐、key 长度限制 |
+| [validation](registry/validation/) | 链式请求校验构建器 | 正则 DoS 防护、拒绝 null 字节/CRLF、panic 恢复 |
+| [file-upload](registry/file-upload/) | 安全文件上传处理器 | Magic bytes 校验、路径穿越防护、大小限制、限流 |
+| [health](registry/health/) | 存活/就绪探针 | SSRF 防护、CRLF 注入防护 |
 | [cache](registry/cache/) | 泛型 TTL + LRU 缓存 | 后台清理、goroutine 泄漏防护、最大条目数限制 |
-| [pagination](registry/pagination/) | Offset/limit + cursor 分页 | cursor base64 验证、负数 offset 归零、最大 limit 限制 |
+| [pagination](registry/pagination/) | Offset/limit + cursor 分页 | cursor base64 校验、负 offset 归零、最大 limit 限制 |
 | [mail](registry/mail/) | SMTP 邮件 + 模板 | 邮件头注入防护、XSS 转义、附件净化、异步队列 |
+
+## CLI 命令
+
+```bash
+scion list [--json]
+scion info <module> [--json]
+scion add <module> --to <dir> [--dry-run] [--force] [--standalone]
+scion diff <module> --target <dir> [--json]
+scion doctor [--strict] [--json]
+scion version [--json]
+```
 
 ## 项目结构
 
-```
+```text
 scion/
-├── registry/
-│   ├── index.json              # 机器可读的模块索引
-│   ├── auth/                   # 认证模块
-│   │   ├── __llms__.md         # AI 可读摘要（约 150 token）
-│   │   ├── README.md           # 人类可读适配指南
-│   │   ├── src/go/             # Go 源代码
-│   │   └── examples/gin/       # 最小可运行示例
-│   ├── crud/                   # CRUD 操作模块
-│   ├── middleware/             # HTTP 中间件集合
-│   ├── rbac/                   # 角色权限控制
-│   ├── ratelimit/              # 限流算法
-│   ├── validation/             # 请求验证构建器
-│   ├── file-upload/            # 文件上传处理器
-│   ├── health/                 # 健康检查探针
-│   ├── cache/                  # 内存缓存
-│   ├── pagination/             # 分页工具
-│   └── mail/                   # 邮件发送
-├── docs/
-│   └── getting-started.md      # 如何使用 Scion
-├── AGENTS.md                   # AI 编码代理指令（英文）
-├── AGENTS_zh.md                # AI 编码代理指令（中文）
-├── CONTRIBUTING.md             # 贡献指南
-├── LICENSE                     # MIT
-└── llms.txt                    # LLM 友好的项目摘要
+|-- cmd/scion/              # CLI 入口
+|-- internal/               # CLI 实现、bundle 读取、doctor 检查
+|-- internal/bundle/        # 从 registry/ 生成的内置模板包
+|-- registry/
+|   |-- index.json          # 机器可读模块索引
+|   |-- auth/               # 认证模块
+|   |-- cache/              # TTL + LRU 缓存
+|   |-- crud/               # CRUD 模块
+|   |-- file-upload/        # 文件上传模块
+|   |-- health/             # 健康检查模块
+|   |-- mail/               # SMTP 邮件模块
+|   |-- middleware/         # HTTP 中间件集合
+|   |-- pagination/         # 分页工具
+|   |-- ratelimit/          # 限流算法
+|   |-- rbac/               # 角色权限控制
+|   `-- validation/         # 请求校验构建器
+|-- docs/                   # VitePress 文档
+|-- AGENTS.md               # AI 编码代理说明
+|-- CONTRIBUTING.md         # 贡献指南
+`-- LICENSE                 # MIT
 ```
-
-## 设计原则
-
-1. **代码所有权** — 复制后每一行代码都是你的，没有上游锁定。
-2. **自包含** — 每个模块独立工作；只有显式声明的安全例外才允许外部依赖。
-3. **框架无关** — 使用 Go 标准 `net/http`，可适配 Gin/Echo 等。
-4. **安全优先** — 内置输入验证、限流、注入防护。
-5. **AI 友好** — `__llms__.md` 文件让 AI 助手在约 200 token 内理解模块。
-6. **经过测试** — 每个模块包含功能测试和渗透测试用例。
 
 ## 开发
 
 ```bash
-# 克隆仓库
-git clone https://github.com/your-org/scion.git
+git clone https://github.com/DarkInno/scion.git
 cd scion
 
-# 运行单个模块的测试
-cd registry/auth/src/go && go test -v ./...
+# registry 改动后重新生成 CLI 内置 bundle
+go run ./internal/cmd/build-bundle
 
-# 运行所有模块的测试（PowerShell）
-$modules = @('middleware','auth','crud','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
-foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
+# 测试和静态检查 CLI
+go test ./cmd/... ./internal/...
+go vet ./cmd/... ./internal/...
 
-# 格式化代码
-cd registry/auth/src/go && gofmt -w .
+# 严格检查 registry
+go run ./cmd/scion doctor --strict
 ```
 
-## 贡献
+PowerShell 中运行所有 registry 模块测试：
 
-欢迎贡献！请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 了解添加新模块的指南。
+```powershell
+$modules = @('middleware','auth','crud','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
+```
+
+## 发布
+
+通过语义化版本 tag 发布：
+
+```bash
+git tag -a v0.1.2 -m "v0.1.2"
+git push origin v0.1.2
+```
+
+Release workflow 会验证 CLI、检查内置 bundle、交叉编译二进制、生成 `SHA256SUMS`，并发布 GitHub Release 资产。
 
 ## 许可证
 
-[MIT](LICENSE) — Copyright (c) 2026 Scion Contributors
+[MIT](LICENSE)
