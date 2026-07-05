@@ -1,0 +1,14 @@
+﻿# Scion
+
+> Scion backend patterns into your project. A copy-paste code library for common backend modules — auth, CRUD, file upload, rate limiting, and more.
+
+Scion is not a framework. It is a pattern registry. You copy code from the `registry/` directory into your project and adapt it with minimal changes. Each module is self-contained, fully documented, and ready to run.
+
+## Docs
+- [Getting Started](docs/getting-started.md): How to use Scion in your project
+- [Registry Index](registry/index.json): Machine-readable list of all patterns
+- [Architecture](docs/architecture.md): Design principles and conventions
+
+## Optional
+- [Contributing](CONTRIBUTING.md): How to add new patterns
+- [License](LICENSE): MIT
