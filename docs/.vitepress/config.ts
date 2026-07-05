@@ -1,11 +1,12 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/scion/',
   title: 'Scion',
   description: 'Copy-paste Go backend modules — zero dependencies, security-first, AI-friendly',
   
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }]
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/scion/logo.svg' }]
   ],
 
   locales: {
