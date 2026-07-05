@@ -123,7 +123,9 @@ func SanitizeFilename(name string) string {
 	name = strings.ReplaceAll(name, "\r", "")
 	name = strings.ReplaceAll(name, "\n", "")
 
-	// Collapse to the base name to drop any path components supplied by the client.
+	// Normalize Windows path separators before extracting base name.
+	// filepath.Base on Linux does not recognize backslashes.
+	name = strings.ReplaceAll(name, "\\", "/")
 	name = filepath.Base(name)
 
 	// Defense in depth: strip any remaining separators and dot-segments that
