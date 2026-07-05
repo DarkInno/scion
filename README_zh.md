@@ -17,7 +17,7 @@ go install github.com/DarkInno/scion/cmd/scion@latest
 如果需要固定版本：
 
 ```bash
-go install github.com/DarkInno/scion/cmd/scion@v0.1.2
+go install github.com/DarkInno/scion/cmd/scion@v0.1.3
 ```
 
 确认 Go bin 目录已加入 `PATH`，然后验证安装：
@@ -30,15 +30,17 @@ scion list
 复制一个仅使用标准库的模块：
 
 ```bash
-scion add cache --to internal/cache --dry-run
-scion add cache --to internal/cache
-scion diff cache --target internal/cache
+scion add cache --dry-run
+scion add cache
+scion diff cache
 ```
+
+省略 `--to` 或 `--target` 时，Scion 会使用模块的默认目标目录，例如 `internal/cache`。你仍然可以用 `--to <dir>` 或 `--target <dir>` 覆盖。
 
 Scion CLI 会复制源码，并写入 `.scion-module.json` 供后续对比使用。它不会自动修改你的 `go.mod`。标记为 `stdlibOnly=false` 的模块，例如 `auth`，需要显式使用 standalone 模式：
 
 ```bash
-scion add auth --standalone --to internal/auth
+scion add auth --standalone
 ```
 
 ## 二进制下载
@@ -54,7 +56,7 @@ sha256sum -c SHA256SUMS
 Windows PowerShell：
 
 ```powershell
-Get-FileHash .\scion_v0.1.2_windows_amd64.zip -Algorithm SHA256
+Get-FileHash .\scion_v0.1.3_windows_amd64.zip -Algorithm SHA256
 ```
 
 ## 为什么是复制粘贴？
@@ -87,11 +89,13 @@ Get-FileHash .\scion_v0.1.2_windows_amd64.zip -Algorithm SHA256
 ```bash
 scion list [--json]
 scion info <module> [--json]
-scion add <module> --to <dir> [--dry-run] [--force] [--standalone]
-scion diff <module> --target <dir> [--json]
+scion add <module> [--to <dir>] [--dry-run] [--force] [--standalone]
+scion diff <module> [--target <dir>] [--json]
 scion doctor [--strict] [--json]
 scion version [--json]
 ```
+
+使用 `scion help <command>` 查看某个命令的示例和选项。
 
 ## 项目结构
 
@@ -148,8 +152,8 @@ foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Po
 通过语义化版本 tag 发布：
 
 ```bash
-git tag -a v0.1.2 -m "v0.1.2"
-git push origin v0.1.2
+git tag -a v0.1.3 -m "v0.1.3"
+git push origin v0.1.3
 ```
 
 Release workflow 会验证 CLI、检查内置 bundle、交叉编译二进制、生成 `SHA256SUMS`，并发布 GitHub Release 资产。
