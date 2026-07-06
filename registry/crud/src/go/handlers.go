@@ -2,10 +2,12 @@ package crud
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // maxRequestBodySize limits request body to 1MB to prevent DoS.
@@ -66,9 +68,16 @@ func (h *Handler[T]) WithFilterFields(allowed map[string]bool) *Handler[T] {
 	return h
 }
 
-// maxFilterValueLen limits the length of individual filter values to prevent
-// abuse via excessively long query parameters.
-const maxFilterValueLen = 256
+const (
+	// maxFilterCount limits generated filter maps to prevent unbounded memory
+	// growth from requests with many unique query parameters.
+	maxFilterCount = 32
+	// maxFilterKeyLen limits filter field names.
+	maxFilterKeyLen = 128
+	// maxFilterValueLen limits the length of individual filter values to
+	// prevent abuse via excessively long query parameters.
+	maxFilterValueLen = 256
+)
 
 // Create handles POST requests.
 func (h *Handler[T]) Create(w http.ResponseWriter, r *http.Request) {
@@ -122,25 +131,38 @@ func (h *Handler[T]) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract filter params
+	// Extract filter params. A nil allow-list disables filtering entirely.
 	filter := make(map[string]string)
-	for key, values := range query {
-		if key == "offset" || key == "limit" || key == "sort" {
-			continue
-		}
-		if len(values) > 0 {
-			if h.filterAllowed != nil && !h.filterAllowed[key] {
+	if h.filterAllowed != nil {
+		for key, values := range query {
+			if key == "offset" || key == "limit" || key == "sort" {
+				continue
+			}
+			if len(filter) >= maxFilterCount {
+				respondError(w, http.StatusBadRequest, "too many filter fields")
+				return
+			}
+			if !isSafeFilterString(key, maxFilterKeyLen) {
+				respondError(w, http.StatusBadRequest, "invalid filter field")
+				return
+			}
+			if !h.filterAllowed[key] {
 				respondError(w, http.StatusBadRequest, "invalid filter field: "+key)
 				return
 			}
-			// Limit filter value length to prevent abuse.
+			if len(values) == 0 {
+				continue
+			}
 			val := values[0]
-			if len(val) > maxFilterValueLen {
-				respondError(w, http.StatusBadRequest, "filter value too long")
+			if !isSafeFilterString(val, maxFilterValueLen) {
+				respondError(w, http.StatusBadRequest, "invalid filter value")
 				return
 			}
 			filter[key] = val
 		}
+	}
+	if len(filter) == 0 {
+		filter = nil
 	}
 
 	params := ParseListParams(offset, limit, h.config.MaxPageSize, sort, filter)
@@ -163,6 +185,13 @@ func (h *Handler[T]) List(w http.ResponseWriter, r *http.Request) {
 		Total:  total,
 		Data:   data,
 	})
+}
+
+func isSafeFilterString(s string, maxLen int) bool {
+	if s == "" || len(s) > maxLen {
+		return false
+	}
+	return !strings.ContainsAny(s, "\r\n\x00")
 }
 
 // Update handles PUT requests by ID.
@@ -218,11 +247,14 @@ func sortFieldFromRaw(raw string) string {
 
 // decodeBody reads and size-limits the request body, then decodes JSON.
 func decodeBody(r *http.Request, dst interface{}) error {
-	body, err := io.ReadAll(io.LimitReader(r.Body, maxRequestBodySize))
+	body, err := io.ReadAll(io.LimitReader(r.Body, maxRequestBodySize+1))
 	if err != nil {
 		return err
 	}
 	defer r.Body.Close()
+	if len(body) > maxRequestBodySize {
+		return errors.New("request body too large")
+	}
 	return json.Unmarshal(body, dst)
 }
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "registryVersion": "0.1.0",
-  "bundleHash": "18284db2be7ca31829f14a922988ce14aab2f5a2f224077c8e6ad7157ac7e003",
+  "registryVersion": "0.2.0",
+  "bundleHash": "a02b457e62e7e559ecef0dff6c0aeb47e901c0092099f1e83085aeb9ddc8c3a6",
   "modules": [
     {
       "id": "auth",
@@ -17,6 +17,11 @@
       "id": "crud",
       "version": "0.1.0",
       "source": "registry/crud/src/go"
+    },
+    {
+      "id": "database",
+      "version": "0.1.0",
+      "source": "registry/database/src/go"
     },
     {
       "id": "file-upload",
@@ -113,15 +118,15 @@
       "path": "registry/auth/src/go/handlers.go",
       "module": "auth",
       "moduleVersion": "0.1.0",
-      "sha256": "552c82e00c6eb87771f39987bf3e3bf4aec162b76a676f1aed01c545b4d80b06",
-      "size": 6555
+      "sha256": "eadff0ccce281b58a7006f4cc5e84f3b54e4f880b1f4628ab86d5775505ab264",
+      "size": 6643
     },
     {
       "path": "registry/auth/src/go/handlers_test.go",
       "module": "auth",
       "moduleVersion": "0.1.0",
-      "sha256": "b0b29d3b202902b9da2ba4dee70981f32c96664ca593fa08633ec905ff473028",
-      "size": 10671
+      "sha256": "188362f3741384dacf1631ac5f110c1578b0adbd8de87c105eb4bedb34c68623",
+      "size": 11023
     },
     {
       "path": "registry/auth/src/go/jwt.go",
@@ -316,15 +321,15 @@
       "path": "registry/crud/src/go/handlers.go",
       "module": "crud",
       "moduleVersion": "0.1.0",
-      "sha256": "9693b7588a165f4c218be244fb456d72e014ea9ab539b1eb51ed886affed0793",
-      "size": 6610
+      "sha256": "b17cd5d67b8eac99c7f406a8ac90ddb87296ee6bbf9b815eae2a014e946da705",
+      "size": 7439
     },
     {
       "path": "registry/crud/src/go/handlers_test.go",
       "module": "crud",
       "moduleVersion": "0.1.0",
-      "sha256": "de92b97b818cb0a64c5203399d1c1f5c222893187b7eb6e439e6b5f025e331cf",
-      "size": 10024
+      "sha256": "07248e7f6421e02182dcedaf5bbf1beb13565ee81d0538984292f6145cd21ed7",
+      "size": 11705
     },
     {
       "path": "registry/crud/src/go/models.go",
@@ -344,8 +349,8 @@
       "path": "registry/crud/src/go/pentest_test.go",
       "module": "crud",
       "moduleVersion": "0.1.0",
-      "sha256": "d971b4ef9942d82ae8e1a5825e67d9925577f8c6f079180c061667dd2bd433e5",
-      "size": 7847
+      "sha256": "8c10b6eaaabadd67a2fa6bacf838af94ddb965c1a4918fec480baaa463de1ded",
+      "size": 8462
     },
     {
       "path": "registry/crud/src/go/routes.go",
@@ -360,6 +365,111 @@
       "moduleVersion": "0.1.0",
       "sha256": "962e48fd141f103df2a6648e3232c4b796a9e2356ad3adcf88b6ecdf946d7713",
       "size": 3052
+    },
+    {
+      "path": "registry/database/README.md",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "5ed6a2fe853d535b0f742b8ba0f9cb34b1ac06344946b3177e555757edcdeb81",
+      "size": 3005
+    },
+    {
+      "path": "registry/database/__llms__.md",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "6b2ea5f58fa15f14cc95830b33695cc24fcd0bbc7a25f580a108eea32dbbccac",
+      "size": 491
+    },
+    {
+      "path": "registry/database/src/go/config.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "35fceebcf600899f9b34f2bb8296a27343c7d1edb61f3e3ed0f94863172ce955",
+      "size": 6588
+    },
+    {
+      "path": "registry/database/src/go/config_test.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "54658ff8144fbc31589ed1f159ee68eb9d3e9dcbcde464161067a887ee06dc58",
+      "size": 4491
+    },
+    {
+      "path": "registry/database/src/go/driver_test.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "00a03b8f9cbc21328daef9624a37ace812fa91c5abfa04d07fbc20e9b63602f8",
+      "size": 2461
+    },
+    {
+      "path": "registry/database/src/go/go.mod",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "c5e7df7c136894507b1fe57e2e2f172c279d43bf0e1dc85187192b11034c3214",
+      "size": 25
+    },
+    {
+      "path": "registry/database/src/go/open.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "4177178b6b7b6c8093fbb11c79eb65b8b00c50447daa4f486a25c6b5af0273cf",
+      "size": 1000
+    },
+    {
+      "path": "registry/database/src/go/open_test.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "a808038e1ebaadf6830c76971ab8c455aaece0d08f54fb0679913145d2a80a99",
+      "size": 2054
+    },
+    {
+      "path": "registry/database/src/go/pentest_test.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "6b50d4b74b34a8469a857f95086895f4bb0b66ddce74588c0f6c4bb66ca312c9",
+      "size": 2874
+    },
+    {
+      "path": "registry/database/src/go/profile.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "2e4390e4ad1c17536cb50ed824f9847d4e317d11fbfa20941059b4923641bdc8",
+      "size": 2828
+    },
+    {
+      "path": "registry/database/src/go/profile_test.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "dfdc3188d4b8528a6ad0b60d4dc87c1a7f389455c7b04607f6274c7fa2128460",
+      "size": 2203
+    },
+    {
+      "path": "registry/database/src/go/query.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "599296ec3b5a1362635377a3508d972d8a81249256f35b016c7745287ef2a1f7",
+      "size": 6211
+    },
+    {
+      "path": "registry/database/src/go/query_test.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "85c05f1cbae1dab1d2f5799f0e3139b461631d5d0bcde6a3062d4c6cb07d28f9",
+      "size": 5832
+    },
+    {
+      "path": "registry/database/src/go/transaction.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "2888af8693a78d802183aece1b2ac16585197ebc258b17836938b07ebecbb0e6",
+      "size": 1841
+    },
+    {
+      "path": "registry/database/src/go/transaction_test.go",
+      "module": "database",
+      "moduleVersion": "0.1.0",
+      "sha256": "533397ceffc2a3a8f936ff42dc724db6b45be4552da47777faee93ef99daef80",
+      "size": 2823
     },
     {
       "path": "registry/file-upload/README.md",
@@ -421,15 +531,15 @@
       "path": "registry/file-upload/src/go/storage.go",
       "module": "file-upload",
       "moduleVersion": "0.1.0",
-      "sha256": "311c0244f5d12942048e892a7bcce92b1e8c3d25f5c7715194fb1823f1623cfa",
-      "size": 5572
+      "sha256": "7d9be5c746bf1c2fa7e0c2d5f428aa4570ffdd961243cb790259326d754c7fd0",
+      "size": 7118
     },
     {
       "path": "registry/file-upload/src/go/storage_test.go",
       "module": "file-upload",
       "moduleVersion": "0.1.0",
-      "sha256": "a1b57a3ba9c83933e4c780b98402e0b571b8205d76a67accd184a8abb2be886a",
-      "size": 1265
+      "sha256": "78309929f161124c981fd293beb246cb04e1a480a9aa29badaffca0f05f120a6",
+      "size": 2211
     },
     {
       "path": "registry/file-upload/src/go/validate.go",
@@ -517,8 +627,8 @@
     },
     {
       "path": "registry/index.json",
-      "sha256": "535534825c49a7ee784b67e65b7d9d74b79e89f5b102739e61e96ab0633f6452",
-      "size": 6856
+      "sha256": "529693ad0317b61ed6c347ee0ed37fb3d4a186716afae194fb31bf76c8510362",
+      "size": 7464
     },
     {
       "path": "registry/mail/README.md",
@@ -650,8 +760,8 @@
       "path": "registry/middleware/src/go/config.go",
       "module": "middleware",
       "moduleVersion": "0.1.0",
-      "sha256": "9e4c17317971a22e9ebc37f9ee39b620b3fa86f43f9014e543d96ae890e3dbe4",
-      "size": 5460
+      "sha256": "058cf100feb21b79a1c842d26e61568a1d817a8a53bcdcc078bc880f2a2b5ec2",
+      "size": 5556
     },
     {
       "path": "registry/middleware/src/go/config_test.go",
@@ -734,15 +844,15 @@
       "path": "registry/middleware/src/go/proxy.go",
       "module": "middleware",
       "moduleVersion": "0.1.0",
-      "sha256": "076abf946207c97047c2d0bc979d3550687ba5c4f394f79a561efe33e873953a",
-      "size": 4624
+      "sha256": "a4017e82ffb0487f99fb7abe7aa9c69d9ada8485e6aa454c2a687961e69b6ab9",
+      "size": 4854
     },
     {
       "path": "registry/middleware/src/go/proxy_test.go",
       "module": "middleware",
       "moduleVersion": "0.1.0",
-      "sha256": "7389c8876c91bc8581f89791b28afccdb5372d67a1ffc383ac20e465196e72ac",
-      "size": 4051
+      "sha256": "6a831f91796d8e3cb09ec4ccf7cc45abbbee056e27ba471b9c1e27bfdbe2c74a",
+      "size": 5076
     },
     {
       "path": "registry/middleware/src/go/recovery.go",
@@ -1049,15 +1159,15 @@
       "path": "registry/rbac/src/go/manager.go",
       "module": "rbac",
       "moduleVersion": "0.1.0",
-      "sha256": "a3a73effe29751c7920589d1d9d97d28a3439a03df7d8abf1ff9ef579ef9ba8f",
-      "size": 7109
+      "sha256": "0d8e1c9adb45f190a4b1f5ad345dc5f6bd4e33e100ac11876d8237486201fe3c",
+      "size": 7616
     },
     {
       "path": "registry/rbac/src/go/manager_test.go",
       "module": "rbac",
       "moduleVersion": "0.1.0",
-      "sha256": "ebc41319f5aa024ff615a53ede9c5ba6178638080d378dbe86bbf16955feccd3",
-      "size": 6170
+      "sha256": "2a2646c190b4ad0ab6dc515ceb135c851af95b46841c9f961747752a0ddd16ca",
+      "size": 7641
     },
     {
       "path": "registry/rbac/src/go/middleware.go",

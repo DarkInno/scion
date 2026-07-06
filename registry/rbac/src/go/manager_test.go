@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -242,4 +243,49 @@ func TestConcurrentAccess(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
+}
+
+func TestManagerCapacityLimits(t *testing.T) {
+	m := NewManager()
+	for i := 0; i < maxRoles; i++ {
+		name := "role" + strconv.Itoa(i)
+		if err := m.AddRole(&Role{Name: name}); err != nil {
+			t.Fatalf("AddRole %d: %v", i, err)
+		}
+	}
+	if err := m.AddRole(&Role{Name: "overflow"}); err != ErrLimitExceeded {
+		t.Fatalf("expected ErrLimitExceeded for role overflow, got %v", err)
+	}
+
+	users := NewManager()
+	if err := users.AddRole(&Role{Name: "base"}); err != nil {
+		t.Fatalf("AddRole base: %v", err)
+	}
+	for i := 0; i < maxUsers; i++ {
+		if err := users.AssignRole("user"+strconv.Itoa(i), "base"); err != nil {
+			t.Fatalf("AssignRole %d: %v", i, err)
+		}
+	}
+	if err := users.AssignRole("overflow", "base"); err != ErrLimitExceeded {
+		t.Fatalf("expected ErrLimitExceeded for user overflow, got %v", err)
+	}
+}
+
+func TestRoleSliceLimits(t *testing.T) {
+	m := NewManager()
+	perms := make([]Permission, maxRolePermissions+1)
+	for i := range perms {
+		perms[i] = Permission{Resource: "r", Action: "a"}
+	}
+	if err := m.AddRole(&Role{Name: "too-many-perms", Permissions: perms}); err != ErrLimitExceeded {
+		t.Fatalf("expected ErrLimitExceeded for permissions, got %v", err)
+	}
+
+	parents := make([]string, maxRoleParents+1)
+	for i := range parents {
+		parents[i] = "parent" + strconv.Itoa(i)
+	}
+	if err := m.AddRole(&Role{Name: "too-many-parents", Parents: parents}); err != ErrLimitExceeded {
+		t.Fatalf("expected ErrLimitExceeded for parents, got %v", err)
+	}
 }

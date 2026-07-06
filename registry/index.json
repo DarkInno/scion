@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "Scion",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Backend pattern registry",
   "patterns": [
     {
@@ -33,6 +33,23 @@
       "package": "crud",
       "source": "registry/crud/src/go",
       "defaultTarget": "internal/crud",
+      "stdlibOnly": true,
+      "include": ["*.go"],
+      "standaloneInclude": ["go.mod", "go.sum"],
+      "status": "ready"
+    },
+    {
+      "id": "database",
+      "name": "Database Helpers",
+      "description": "database/sql connection setup, transaction helper, and safe query fragments",
+      "path": "registry/database",
+      "languages": ["go"],
+      "frameworks": [],
+      "tags": ["database", "sql", "transactions", "connection-pool", "security"],
+      "version": "0.1.0",
+      "package": "database",
+      "source": "registry/database/src/go",
+      "defaultTarget": "internal/database",
       "stdlibOnly": true,
       "include": ["*.go"],
       "standaloneInclude": ["go.mod", "go.sum"],

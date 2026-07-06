@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -20,9 +21,10 @@ func TestClientIPRemoteAddr(t *testing.T) {
 
 func TestClientIPProxyCount(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "10.0.0.1:12345"
 	req.Header.Set("X-Forwarded-For", " 1.1.1.1, 2.2.2.2, 3.3.3.3 ")
 
-	opts := ProxyOptions{ProxyCount: 2}
+	opts := ProxyOptions{TrustedProxies: []string{"10.0.0.0/8"}, ProxyCount: 2}
 	ip := ClientIPWithOptions(req, opts)
 
 	if ip != "1.1.1.1" {
@@ -32,6 +34,7 @@ func TestClientIPProxyCount(t *testing.T) {
 
 func TestClientIPCIDRWhitelist(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "10.0.0.1:12345"
 	req.Header.Set("X-Forwarded-For", "1.1.1.1, 10.0.0.1")
 
 	opts := ProxyOptions{
@@ -60,10 +63,11 @@ func TestClientIPNoXFF(t *testing.T) {
 
 func TestClientIPRealIP(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "10.0.0.1:12345"
 	req.Header.Set("X-Real-IP", "203.0.113.50")
 
 	// No X-Forwarded-For, so X-Real-IP is used as fallback.
-	opts := ProxyOptions{ProxyCount: 1}
+	opts := ProxyOptions{TrustedProxies: []string{"10.0.0.0/8"}, ProxyCount: 1}
 	ip := ClientIPWithOptions(req, opts)
 
 	if ip != "203.0.113.50" {
@@ -84,6 +88,7 @@ func TestTrustedProxyMiddleware(t *testing.T) {
 
 	handler := mw(next)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "10.0.0.1:12345"
 	req.Header.Set("X-Forwarded-For", "5.5.5.5, 10.0.0.1")
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
@@ -95,16 +100,39 @@ func TestTrustedProxyMiddleware(t *testing.T) {
 
 func TestProxyCountClamp(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "10.0.0.1:12345"
 	req.Header.Set("X-Forwarded-For", "1.1.1.1, 2.2.2.2, 3.3.3.3, 4.4.4.4, 5.5.5.5")
 
 	// ProxyCount=100 should be clamped to 10 (maxProxyCount).
-	opts := ProxyOptions{ProxyCount: 100}
+	opts := ProxyOptions{TrustedProxies: []string{"10.0.0.0/8"}, ProxyCount: 100}
 	ip := ClientIPWithOptions(req, opts)
 
 	// With 5 IPs and ProxyCount=10 (clamped): idx = 5 - 10 - 1 = -6 < 0,
 	// so it falls through to return ips[0].
 	if ip != "1.1.1.1" {
 		t.Errorf("expected leftmost IP 1.1.1.1 when ProxyCount exceeds chain length, got %q", ip)
+	}
+}
+
+func TestClientIPIgnoresTrustedProxyContext(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "5.6.7.8:12345"
+	ctx := context.WithValue(req.Context(), clientIPKey, "1.1.1.1")
+	req = req.WithContext(ctx)
+
+	if got := ClientIP(req); got != "5.6.7.8" {
+		t.Fatalf("ClientIP = %q, want RemoteAddr", got)
+	}
+}
+
+func TestClientIPWithOptionsRejectsUntrustedRemote(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "5.6.7.8:12345"
+	req.Header.Set("X-Forwarded-For", "1.1.1.1")
+
+	ip := ClientIPWithOptions(req, ProxyOptions{TrustedProxies: []string{"10.0.0.0/8"}})
+	if ip != "5.6.7.8" {
+		t.Fatalf("ClientIPWithOptions = %q, want RemoteAddr", ip)
 	}
 }
 

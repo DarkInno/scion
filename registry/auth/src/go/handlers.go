@@ -63,11 +63,14 @@ func (h *Handler) WithLogger(logger *slog.Logger) *Handler {
 
 // decodeBody reads and size-limits the request body, then decodes JSON.
 func decodeBody(r *http.Request, dst interface{}) error {
-	body, err := io.ReadAll(io.LimitReader(r.Body, maxRequestBodySize))
+	body, err := io.ReadAll(io.LimitReader(r.Body, maxRequestBodySize+1))
 	if err != nil {
 		return err
 	}
 	defer r.Body.Close()
+	if len(body) > maxRequestBodySize {
+		return errors.New("request body too large")
+	}
 	return json.Unmarshal(body, dst)
 }
 

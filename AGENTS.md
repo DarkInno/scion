@@ -6,7 +6,7 @@
 
 ## Project Description
 
-Scion is a copy-paste code library for Go backend development. It contains 11 self-contained modules in `registry/` — each is a standalone Go package. Modules are standard-library only by default; security-sensitive modules may be declared as `stdlibOnly:false` in `registry/index.json` and copied in standalone mode. Modules are meant to be copied into a user's project and adapted, not imported as a dependency.
+Scion is a copy-paste code library for Go backend development. It contains 12 self-contained modules in `registry/` — each is a standalone Go package. Modules are standard-library only by default; security-sensitive modules may be declared as `stdlibOnly:false` in `registry/index.json` and copied in standalone mode. Modules are meant to be copied into a user's project and adapted, not imported as a dependency.
 
 ## Coding Standards
 
@@ -63,7 +63,7 @@ cd registry/<module>/src/go && go test -v -count=1 ./...
 
 ```bash
 # PowerShell
-$modules = @('middleware','auth','crud','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 
@@ -89,7 +89,7 @@ You are working on Scion, a copy-paste code library for Go backend development.
 Project location: <path-to-scion>
 
 Architecture:
-- 11 modules in registry/ — each is a standalone Go package
+- 12 modules in registry/ — each is a standalone Go package
 - Module path pattern: registry/<module>/src/go/
 - Go 1.22+, standard library by default, gofmt mandatory
 
@@ -125,9 +125,10 @@ Task: <describe your task here>
 
 ```
 scion/
-├── registry/                 # 11 copy-paste modules
+├── registry/                 # 12 copy-paste modules
 │   ├── auth/                 # JWT auth + bcrypt
 │   ├── crud/                 # Generic CRUD + pagination
+│   ├── database/             # database/sql helpers
 │   ├── middleware/           # 9 HTTP middlewares
 │   ├── rbac/                 # Role-based access control
 │   ├── ratelimit/            # 3 rate limiting algorithms

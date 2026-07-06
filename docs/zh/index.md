@@ -25,6 +25,10 @@ features:
     title: CRUD 增删改查
     details: 通用 CRUD 操作 + 分页，排序/过滤白名单，SQL注入防护。
     link: /zh/modules/crud
+  - icon: SQL
+    title: Database 数据库
+    details: database/sql 设置、事务封装和 SQL 片段白名单。
+    link: /zh/modules/database
   - icon: 🛡️
     title: Middleware 中间件
     details: Recovery、CORS、日志、超时、请求ID、请求体大小限制。

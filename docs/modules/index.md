@@ -1,6 +1,6 @@
 # Modules Overview
 
-Scion provides 11 production-ready, copy-paste Go modules. Each module is self-contained. Modules are standard-library only by default; declared security exceptions are marked in the registry.
+Scion provides 12 production-ready, copy-paste Go modules. Each module is self-contained. Modules are standard-library only by default; declared security exceptions are marked in the registry.
 
 ## Available Modules
 
@@ -8,6 +8,7 @@ Scion provides 11 production-ready, copy-paste Go modules. Each module is self-c
 |--------|-------------|-------------------|
 | [Auth](/modules/auth) | JWT email/password auth + bcrypt | Rate limiting, user enumeration prevention, JTI |
 | [CRUD](/modules/crud) | Generic CRUD with pagination | Sort/filter whitelist, SQL injection prevention |
+| [Database](/modules/database) | `database/sql` setup + transactions | DSN-safe errors, whitelisted SQL fragments |
 | [Middleware](/modules/middleware) | Recovery, CORS, logging, timeout | CRLF injection prevention, body size limit |
 | [RBAC](/modules/rbac) | Role-based access control | Wildcard permissions, cycle detection |
 | [Rate Limit](/modules/ratelimit) | Fixed/sliding window, token bucket | Memory exhaustion protection, LRU eviction |

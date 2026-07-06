@@ -114,7 +114,8 @@ type ProxyOptions struct {
 	TrustedProxies []string
 
 	// ProxyCount is the number of trusted proxy layers. 0 = trust none.
-	// If both set, TrustedProxies takes precedence.
+	// Forwarded headers are considered only when r.RemoteAddr is inside
+	// TrustedProxies; ProxyCount alone never makes arbitrary clients trusted.
 	ProxyCount int
 }
 

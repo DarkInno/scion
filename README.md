@@ -74,6 +74,7 @@ Backend modules such as auth, CRUD, file upload, and rate limiting share most of
 |--------|-------------|-------------------|
 | [auth](registry/auth/) | JWT email/password auth + bcrypt | Rate limiting, user enumeration prevention, JTI, aud/iss validation |
 | [crud](registry/crud/) | Generic CRUD with pagination | Sort/filter whitelist, SQL injection prevention, pagination ceiling |
+| [database](registry/database/) | `database/sql` setup + transactions | DSN-safe errors, whitelisted SQL fragments, parameterized values |
 | [middleware](registry/middleware/) | Recovery, CORS, logging, timeout, etc. | CRLF injection prevention, trusted proxy, body size limit |
 | [rbac](registry/rbac/) | Role-based access control | Wildcard permissions, cycle detection, hierarchy inheritance |
 | [ratelimit](registry/ratelimit/) | Fixed window / sliding window / token bucket | Memory exhaustion protection, LRU eviction, key length limit |
@@ -109,6 +110,7 @@ scion/
 |   |-- auth/               # Authentication module
 |   |-- cache/              # TTL + LRU cache
 |   |-- crud/               # CRUD operations module
+|   |-- database/           # database/sql helpers
 |   |-- file-upload/        # File upload handler
 |   |-- health/             # Health check probes
 |   |-- mail/               # SMTP email sender
@@ -143,7 +145,7 @@ go run ./cmd/scion doctor --strict
 Run tests for all registry modules in PowerShell:
 
 ```powershell
-$modules = @('middleware','auth','crud','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 

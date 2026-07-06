@@ -332,7 +332,6 @@ func TestHandler_Me_Unauthorized(t *testing.T) {
 }
 
 func TestDecodeBody_MaxSize(t *testing.T) {
-	// 1MB + 1 should be truncated by LimitReader
 	large := make([]byte, maxRequestBodySize+1)
 	req := httptest.NewRequest(http.MethodPost, "/test", bytes.NewReader(large))
 
@@ -341,6 +340,17 @@ func TestDecodeBody_MaxSize(t *testing.T) {
 	// Should fail because truncated JSON is invalid
 	if err == nil {
 		t.Error("expected error for oversized body")
+	}
+}
+
+func TestDecodeBody_RejectsOversizedValidJSONPrefix(t *testing.T) {
+	prefix := []byte(`{"key":"value"}`)
+	body := append(prefix, bytes.Repeat([]byte(" "), maxRequestBodySize-len(prefix)+1)...)
+	req := httptest.NewRequest(http.MethodPost, "/test", bytes.NewReader(body))
+
+	var dst map[string]interface{}
+	if err := decodeBody(req, &dst); err == nil {
+		t.Fatal("expected oversized body error")
 	}
 }
 
