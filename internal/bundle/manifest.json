@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "registryVersion": "0.2.0",
-  "bundleHash": "a02b457e62e7e559ecef0dff6c0aeb47e901c0092099f1e83085aeb9ddc8c3a6",
+  "bundleHash": "bea9fed999eeaac57df1837e148a9a8a5ddf11b55dac47740d1aacacb32d1d8d",
   "modules": [
     {
       "id": "auth",
@@ -370,8 +370,8 @@
       "path": "registry/database/README.md",
       "module": "database",
       "moduleVersion": "0.1.0",
-      "sha256": "5ed6a2fe853d535b0f742b8ba0f9cb34b1ac06344946b3177e555757edcdeb81",
-      "size": 3005
+      "sha256": "b965f9107f529fda5d732b5afc051357c13d38f6c3d50eb7f460cef0c3e6af72",
+      "size": 3212
     },
     {
       "path": "registry/database/__llms__.md",
@@ -405,8 +405,8 @@
       "path": "registry/database/src/go/go.mod",
       "module": "database",
       "moduleVersion": "0.1.0",
-      "sha256": "c5e7df7c136894507b1fe57e2e2f172c279d43bf0e1dc85187192b11034c3214",
-      "size": 25
+      "sha256": "585b325189217d789ecf2891cb221f0d65c2d88f216a2f67cbe6f42e5dc8295b",
+      "size": 31
     },
     {
       "path": "registry/database/src/go/open.go",

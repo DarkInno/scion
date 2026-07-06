@@ -61,6 +61,7 @@ jobs:
             middleware
             auth
             crud
+            database
             rbac
             ratelimit
             validation
@@ -100,6 +101,7 @@ jobs:
             middleware
             auth
             crud
+            database
             rbac
             ratelimit
             validation
@@ -147,6 +149,7 @@ jobs:
             middleware
             auth
             crud
+            database
             rbac
             ratelimit
             validation
