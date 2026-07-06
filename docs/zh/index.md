@@ -65,6 +65,18 @@ features:
     title: Mail 邮件
     details: SMTP 邮件 + 模板，头部注入防护，异步队列。
     link: /zh/modules/mail
+  - icon: SQL
+    title: Migrations 迁移
+    details: SQL 迁移执行器，包含 checksum、事务和安全文件校验。
+    link: /zh/modules/migrations
+  - icon: 📈
+    title: Metrics 指标
+    details: Prometheus HTTP 指标，包含路由基数限制和 label 净化。
+    link: /zh/modules/metrics
+  - icon: ⚠️
+    title: Problem Details 错误响应
+    details: RFC 9457 API 错误响应，包含 panic 恢复和安全 detail。
+    link: /zh/modules/problem
 ---
 
 ## 快速开始

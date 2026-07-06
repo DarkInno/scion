@@ -6,12 +6,12 @@
 
 ## 项目描述
 
-Scion 是一个面向 Go 后端开发的复制粘贴代码库。`registry/` 目录下有 12 个自包含模块，每个都是独立的 Go 包。模块默认仅使用标准库；安全敏感模块可以在 `registry/index.json` 中显式标记为 `stdlibOnly:false`，并以 standalone 模式复制。模块的设计目的是被复制到用户项目中并适配，而非作为依赖导入。
+Scion 是一个面向 Go 后端开发的复制粘贴代码库。`registry/` 目录下有 15 个自包含模块，每个都是独立的 Go 包。模块默认仅使用标准库；安全敏感或可观测性模块可以在 `registry/index.json` 中显式标记为 `stdlibOnly:false`，并以 standalone 模式复制。模块的设计目的是被复制到用户项目中并适配，而非作为依赖导入。
 
 ## 编码标准
 
 - Go 1.22+，使用泛型
-- 默认仅使用标准库；显式标记为 `stdlibOnly:false` 的模块可以使用成熟安全库
+- 默认仅使用标准库；显式标记为 `stdlibOnly:false` 的模块可以使用成熟安全或可观测性库
 - `gofmt` 格式化是强制的
 - `go vet` 必须零警告通过
 - 中间件签名：`func(http.Handler) http.Handler`
@@ -63,13 +63,13 @@ cd registry/<module>/src/go && go test -v -count=1 ./...
 
 ```bash
 # PowerShell
-$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail','migrations','metrics','problem')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 
 ## 关键约束
 
-- 不要给任何模块的 `go.mod` 添加外部依赖，除非该模块已在 `registry/index.json` 显式标记为 `stdlibOnly:false`，且依赖对安全或正确性有明确价值
+- 不要给任何模块的 `go.mod` 添加外部依赖，除非该模块已在 `registry/index.json` 显式标记为 `stdlibOnly:false`，且依赖对安全、正确性或可观测性有明确价值
 - 不要在 HTTP 处理器中使用 `panic` — 返回错误
 - 不要信任客户端 header（`Content-Type`、`X-Forwarded-For`、`X-Real-Ip`）
 - 不要用 `strings.Split` 解析 header — 用 `strings.SplitN` 加限制
@@ -89,7 +89,7 @@ foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Po
 项目路径: <scion-项目路径>
 
 架构:
-- registry/ 下有 12 个模块 — 每个是独立的 Go 包
+- registry/ 下有 15 个模块 — 每个是独立的 Go 包
 - 模块路径模式: registry/<模块名>/src/go/
 - Go 1.22+，默认仅使用标准库，gofmt 强制
 
@@ -125,7 +125,7 @@ foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Po
 
 ```
 scion/
-├── registry/                 # 12 个复制粘贴模块
+├── registry/                 # 15 个复制粘贴模块
 │   ├── auth/                 # JWT 认证 + bcrypt
 │   ├── crud/                 # 泛型 CRUD + 分页
 │   ├── database/             # database/sql 工具
@@ -137,7 +137,10 @@ scion/
 │   ├── health/               # 存活/就绪探针
 │   ├── cache/                # TTL + LRU 缓存
 │   ├── pagination/           # Offset + cursor 分页
-│   └── mail/                 # SMTP 邮件发送
+│   ├── mail/                 # SMTP 邮件发送
+│   ├── migrations/           # SQL 迁移执行器
+│   ├── metrics/              # Prometheus HTTP 指标
+│   └── problem/              # RFC 9457 错误响应
 ├── docs/                     # 人类可读文档
 ├── AGENTS.md                 # 本文件（英文）
 ├── AGENTS_zh.md              # 本文件（中文）

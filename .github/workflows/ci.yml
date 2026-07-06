@@ -70,6 +70,9 @@ jobs:
             cache
             pagination
             mail
+            migrations
+            metrics
+            problem
           )
           for mod in "${modules[@]}"; do
             echo "::group::go vet: $mod"
@@ -110,6 +113,9 @@ jobs:
             cache
             pagination
             mail
+            migrations
+            metrics
+            problem
           )
           failed=0
           for mod in "${modules[@]}"; do
@@ -158,6 +164,9 @@ jobs:
             cache
             pagination
             mail
+            migrations
+            metrics
+            problem
           )
           for mod in "${modules[@]}"; do
             echo "::group::go build: $mod"

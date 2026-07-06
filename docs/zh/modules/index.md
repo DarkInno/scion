@@ -1,6 +1,6 @@
 # 模块概览
 
-Scion 提供 12 个生产就绪、可复制粘贴的 Go 模块。每个模块自包含。模块默认仅使用标准库；安全例外会在 registry 中显式标记。
+Scion 提供 15 个生产就绪、可复制粘贴的 Go 模块。每个模块自包含。模块默认仅使用标准库；安全和可观测性例外会在 registry 中显式标记。
 
 ## 可用模块
 
@@ -18,6 +18,9 @@ Scion 提供 12 个生产就绪、可复制粘贴的 Go 模块。每个模块自
 | [Cache](/zh/modules/cache) | TTL + LRU 内存缓存 | 后台清理，最大条目限制 |
 | [Pagination](/zh/modules/pagination) | 偏移/游标分页 | 游标 Base64 校验，最大限制强制 |
 | [Mail](/zh/modules/mail) | SMTP 邮件 + 模板 | 头部注入防护，XSS 转义 |
+| [Migrations](/zh/modules/migrations) | SQL 迁移执行器 | 安全文件名，表名白名单，checksum |
+| [Metrics](/zh/modules/metrics) | Prometheus HTTP 指标 | 路由基数限制，label 净化 |
+| [Problem Details](/zh/modules/problem) | RFC 9457 API 错误响应 | CRLF/null 拒绝，panic 恢复 |
 
 ## 快速复制
 
@@ -54,4 +57,4 @@ go test -v ./...
 
 ## 依赖
 
-模块默认仅使用 Go 标准库。显式例外（如 auth）会在 standalone 模式下复制自己的 `go.mod`。
+模块默认仅使用 Go 标准库。显式例外（如 auth 和 metrics）会在 standalone 模式下复制自己的 `go.mod`。

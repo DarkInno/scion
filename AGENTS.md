@@ -6,12 +6,12 @@
 
 ## Project Description
 
-Scion is a copy-paste code library for Go backend development. It contains 12 self-contained modules in `registry/` — each is a standalone Go package. Modules are standard-library only by default; security-sensitive modules may be declared as `stdlibOnly:false` in `registry/index.json` and copied in standalone mode. Modules are meant to be copied into a user's project and adapted, not imported as a dependency.
+Scion is a copy-paste code library for Go backend development. It contains 15 self-contained modules in `registry/` — each is a standalone Go package. Modules are standard-library only by default; security-sensitive or observability modules may be declared as `stdlibOnly:false` in `registry/index.json` and copied in standalone mode. Modules are meant to be copied into a user's project and adapted, not imported as a dependency.
 
 ## Coding Standards
 
 - Go 1.22+ with generics
-- Standard library only by default; declared `stdlibOnly:false` modules may use mature security libraries
+- Standard library only by default; declared `stdlibOnly:false` modules may use mature security or observability libraries
 - `gofmt` formatting is mandatory
 - `go vet` must pass with zero warnings
 - Middleware signature: `func(http.Handler) http.Handler`
@@ -63,13 +63,13 @@ cd registry/<module>/src/go && go test -v -count=1 ./...
 
 ```bash
 # PowerShell
-$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail','migrations','metrics','problem')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 
 ## Key Constraints
 
-- Do NOT add external dependencies to any module's `go.mod` unless the module is explicitly marked `stdlibOnly:false` in `registry/index.json` and the dependency is justified for security or correctness
+- Do NOT add external dependencies to any module's `go.mod` unless the module is explicitly marked `stdlibOnly:false` in `registry/index.json` and the dependency is justified for security, correctness, or observability
 - Do NOT use `panic` in HTTP handlers — return errors
 - Do NOT trust client headers (`Content-Type`, `X-Forwarded-For`, `X-Real-Ip`)
 - Do NOT use `strings.Split` for header parsing — use `strings.SplitN` with a limit
@@ -89,7 +89,7 @@ You are working on Scion, a copy-paste code library for Go backend development.
 Project location: <path-to-scion>
 
 Architecture:
-- 12 modules in registry/ — each is a standalone Go package
+- 15 modules in registry/ — each is a standalone Go package
 - Module path pattern: registry/<module>/src/go/
 - Go 1.22+, standard library by default, gofmt mandatory
 
@@ -125,7 +125,7 @@ Task: <describe your task here>
 
 ```
 scion/
-├── registry/                 # 12 copy-paste modules
+├── registry/                 # 15 copy-paste modules
 │   ├── auth/                 # JWT auth + bcrypt
 │   ├── crud/                 # Generic CRUD + pagination
 │   ├── database/             # database/sql helpers
@@ -137,7 +137,10 @@ scion/
 │   ├── health/               # Liveness/readiness probes
 │   ├── cache/                # TTL + LRU cache
 │   ├── pagination/           # Offset + cursor pagination
-│   └── mail/                 # SMTP email sender
+│   ├── mail/                 # SMTP email sender
+│   ├── migrations/           # SQL migration runner
+│   ├── metrics/              # Prometheus HTTP metrics
+│   └── problem/              # RFC 9457 problem responses
 ├── docs/                     # Human-readable docs
 ├── AGENTS.md                 # This file (English)
 ├── AGENTS_zh.md              # This file (Chinese)

@@ -37,7 +37,7 @@ scion diff cache
 
 省略 `--to` 或 `--target` 时，Scion 会使用模块的默认目标目录，例如 `internal/cache`。你仍然可以用 `--to <dir>` 或 `--target <dir>` 覆盖。
 
-Scion CLI 会复制源码，并写入 `.scion-module.json` 供后续对比使用。它不会自动修改你的 `go.mod`。标记为 `stdlibOnly=false` 的模块，例如 `auth`，需要显式使用 standalone 模式：
+Scion CLI 会复制源码，并写入 `.scion-module.json` 供后续对比使用。它不会自动修改你的 `go.mod`。标记为 `stdlibOnly=false` 的模块，例如 `auth` 和 `metrics`，需要显式使用 standalone 模式：
 
 ```bash
 scion add auth --standalone
@@ -84,6 +84,9 @@ Get-FileHash .\scion_v0.1.3_windows_amd64.zip -Algorithm SHA256
 | [cache](registry/cache/) | 泛型 TTL + LRU 缓存 | 后台清理、goroutine 泄漏防护、最大条目数限制 |
 | [pagination](registry/pagination/) | Offset/limit + cursor 分页 | cursor base64 校验、负 offset 归零、最大 limit 限制 |
 | [mail](registry/mail/) | SMTP 邮件 + 模板 | 邮件头注入防护、XSS 转义、附件净化、异步队列 |
+| [migrations](registry/migrations/) | SQL 迁移执行器 | 安全文件名、表名白名单、checksum、事务 |
+| [metrics](registry/metrics/) | Prometheus HTTP 指标 | 路由基数限制、label 净化、隔离 registry |
+| [problem](registry/problem/) | RFC 9457 错误响应 | CRLF/null 拒绝、detail 截断、panic 恢复 |
 
 ## CLI 命令
 
@@ -114,8 +117,11 @@ scion/
 |   |-- file-upload/        # 文件上传模块
 |   |-- health/             # 健康检查模块
 |   |-- mail/               # SMTP 邮件模块
+|   |-- metrics/            # Prometheus HTTP 指标
+|   |-- migrations/         # SQL 迁移执行器
 |   |-- middleware/         # HTTP 中间件集合
 |   |-- pagination/         # 分页工具
+|   |-- problem/            # Problem Details API 错误
 |   |-- ratelimit/          # 限流算法
 |   |-- rbac/               # 角色权限控制
 |   `-- validation/         # 请求校验构建器
@@ -145,7 +151,7 @@ go run ./cmd/scion doctor --strict
 PowerShell 中运行所有 registry 模块测试：
 
 ```powershell
-$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail','migrations','metrics','problem')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 

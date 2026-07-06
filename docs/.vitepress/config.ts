@@ -46,7 +46,10 @@ export default defineConfig({
                 { text: 'Health', link: '/modules/health' },
                 { text: 'Cache', link: '/modules/cache' },
                 { text: 'Pagination', link: '/modules/pagination' },
-                { text: 'Mail', link: '/modules/mail' }
+                { text: 'Mail', link: '/modules/mail' },
+                { text: 'Migrations', link: '/modules/migrations' },
+                { text: 'Metrics', link: '/modules/metrics' },
+                { text: 'Problem Details', link: '/modules/problem' }
               ]
             }
           ]
@@ -95,7 +98,10 @@ export default defineConfig({
                 { text: 'Health 健康检查', link: '/zh/modules/health' },
                 { text: 'Cache 缓存', link: '/zh/modules/cache' },
                 { text: 'Pagination 分页', link: '/zh/modules/pagination' },
-                { text: 'Mail 邮件', link: '/zh/modules/mail' }
+                { text: 'Mail 邮件', link: '/zh/modules/mail' },
+                { text: 'Migrations 迁移', link: '/zh/modules/migrations' },
+                { text: 'Metrics 指标', link: '/zh/modules/metrics' },
+                { text: 'Problem Details 错误响应', link: '/zh/modules/problem' }
               ]
             }
           ]
