@@ -53,7 +53,7 @@ Add your module to `registry/index.json`.
 ## Code Standards
 
 - Go 1.22+ with generics
-- Standard library only by default; external dependencies require an explicit `stdlibOnly:false` registry entry and security/correctness justification
+- Standard library only by default; external dependencies require an explicit `stdlibOnly:false` registry entry and security/correctness/observability justification
 - `gofmt` formatting
 - `go vet` must pass
 - Middleware signature: `func(http.Handler) http.Handler`
@@ -66,7 +66,7 @@ Add your module to `registry/index.json`.
 cd registry/<module>/src/go && go test -v ./...
 
 # Test all modules
-$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail','migrations','metrics','problem')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 

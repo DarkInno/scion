@@ -65,6 +65,18 @@ features:
     title: Mail
     details: SMTP email with templates, header injection prevention, and async queue.
     link: /modules/mail
+  - icon: SQL
+    title: Migrations
+    details: SQL migration runner with checksums, transactions, and safe file validation.
+    link: /modules/migrations
+  - icon: 📈
+    title: Metrics
+    details: Prometheus HTTP metrics with route cardinality limits and label sanitization.
+    link: /modules/metrics
+  - icon: ⚠️
+    title: Problem Details
+    details: RFC 9457 API error responses with panic recovery and safe details.
+    link: /modules/problem
 ---
 
 ## Quick Start

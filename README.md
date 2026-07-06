@@ -37,7 +37,7 @@ scion diff cache
 
 When `--to` or `--target` is omitted, Scion uses the module's default target, such as `internal/cache`. You can still override it with `--to <dir>` or `--target <dir>`.
 
-Scion copies source files and writes `.scion-module.json` metadata for later comparison. It never edits your project's `go.mod` automatically. Modules marked `stdlibOnly=false`, such as `auth`, require explicit standalone mode:
+Scion copies source files and writes `.scion-module.json` metadata for later comparison. It never edits your project's `go.mod` automatically. Modules marked `stdlibOnly=false`, such as `auth` and `metrics`, require explicit standalone mode:
 
 ```bash
 scion add auth --standalone
@@ -84,6 +84,9 @@ Backend modules such as auth, CRUD, file upload, and rate limiting share most of
 | [cache](registry/cache/) | Generic TTL + LRU cache | Background cleanup, goroutine leak prevention, max entries limit |
 | [pagination](registry/pagination/) | Offset/limit + cursor pagination | Cursor base64 validation, negative offset clamp, max limit enforcement |
 | [mail](registry/mail/) | SMTP email with templates | Header injection prevention, XSS escaping, attachment sanitization, async queue |
+| [migrations](registry/migrations/) | SQL migration runner | Safe filenames, table whitelist, checksums, transactions |
+| [metrics](registry/metrics/) | Prometheus HTTP metrics | Route cardinality limits, label sanitization, isolated registry |
+| [problem](registry/problem/) | RFC 9457 problem responses | CRLF/null rejection, detail truncation, panic recovery |
 
 ## CLI Commands
 
@@ -114,8 +117,11 @@ scion/
 |   |-- file-upload/        # File upload handler
 |   |-- health/             # Health check probes
 |   |-- mail/               # SMTP email sender
+|   |-- metrics/            # Prometheus HTTP metrics
+|   |-- migrations/         # SQL migration runner
 |   |-- middleware/         # HTTP middleware collection
 |   |-- pagination/         # Pagination utilities
+|   |-- problem/            # Problem Details API errors
 |   |-- ratelimit/          # Rate limiting algorithms
 |   |-- rbac/               # Role-based access control
 |   `-- validation/         # Request validation builder
@@ -145,7 +151,7 @@ go run ./cmd/scion doctor --strict
 Run tests for all registry modules in PowerShell:
 
 ```powershell
-$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail','migrations','metrics','problem')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 

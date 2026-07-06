@@ -162,6 +162,9 @@ jobs:
             cache
             pagination
             mail
+            migrations
+            metrics
+            problem
           )
 
           for mod in "${modules[@]}"; do

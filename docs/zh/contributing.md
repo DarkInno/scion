@@ -66,7 +66,7 @@ go test -v ./...
 cd registry/<module>/src/go && go test -v ./...
 
 # 测试所有模块
-$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail','migrations','metrics','problem')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 

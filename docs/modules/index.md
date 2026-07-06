@@ -1,6 +1,6 @@
 # Modules Overview
 
-Scion provides 12 production-ready, copy-paste Go modules. Each module is self-contained. Modules are standard-library only by default; declared security exceptions are marked in the registry.
+Scion provides 15 production-ready, copy-paste Go modules. Each module is self-contained. Modules are standard-library only by default; declared security and observability exceptions are marked in the registry.
 
 ## Available Modules
 
@@ -18,6 +18,9 @@ Scion provides 12 production-ready, copy-paste Go modules. Each module is self-c
 | [Cache](/modules/cache) | TTL + LRU in-memory cache | Background cleanup, max entries limit |
 | [Pagination](/modules/pagination) | Offset/cursor pagination | Cursor base64 validation, max limit enforcement |
 | [Mail](/modules/mail) | SMTP email with templates | Header injection prevention, XSS escaping |
+| [Migrations](/modules/migrations) | SQL migration runner | Safe filenames, table whitelist, checksums |
+| [Metrics](/modules/metrics) | Prometheus HTTP metrics | Route cardinality limits, label sanitization |
+| [Problem Details](/modules/problem) | RFC 9457 API errors | CRLF/null rejection, panic recovery |
 
 ## Quick Copy
 
@@ -54,4 +57,4 @@ go test -v ./...
 
 ## Dependencies
 
-Modules use only the Go standard library by default. Declared exceptions, such as auth, copy their own `go.mod` in standalone mode.
+Modules use only the Go standard library by default. Declared exceptions, such as auth and metrics, copy their own `go.mod` in standalone mode.
