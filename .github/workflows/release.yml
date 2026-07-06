@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [master]
   workflow_dispatch:
     inputs:
       tag:
@@ -15,34 +19,45 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   release:
     name: Build and publish release
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'master')
     steps:
-      - name: Resolve tag
+      - name: Resolve release source
         id: release
         shell: bash
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             tag="${{ inputs.tag }}"
+            ref="$tag"
+            automatic="false"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            tag=""
+            ref="${{ github.event.workflow_run.head_sha }}"
+            automatic="true"
           else
             tag="${{ github.ref_name }}"
+            ref="$tag"
+            automatic="false"
           fi
-          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [ -n "$tag" ] && [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::Release tag must match vMAJOR.MINOR.PATCH, got: $tag"
             exit 1
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "automatic=$automatic" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout tag
+      - name: Checkout release source
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.release.outputs.tag }}
+          ref: ${{ steps.release.outputs.ref }}
           fetch-depth: 0
 
       - name: Setup Go
@@ -50,13 +65,59 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Resolve automatic tag
+        id: auto
+        if: steps.release.outputs.automatic == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="${{ github.event.workflow_run.head_sha }}"
+          existing="$(git tag --points-at "$sha" --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1 || true)"
+          create_tag="false"
+
+          if [ -n "$existing" ]; then
+            tag="$existing"
+          else
+            latest="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1 || true)"
+            if [ -z "$latest" ]; then
+              latest="v0.0.0"
+            fi
+
+            version="${latest#v}"
+            IFS=. read -r major minor patch <<< "$version"
+            tag="v${major}.${minor}.$((patch + 1))"
+            create_tag="true"
+          fi
+
+          should_publish="true"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            should_publish="false"
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "create_tag=$create_tag" >> "$GITHUB_OUTPUT"
+          echo "should_publish=$should_publish" >> "$GITHUB_OUTPUT"
+
+      - name: Create automatic tag
+        if: steps.release.outputs.automatic == 'true' && steps.auto.outputs.create_tag == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.auto.outputs.tag }}"
+          sha="${{ github.event.workflow_run.head_sha }}"
+          git tag "$tag" "$sha"
+          git push origin "refs/tags/$tag"
+
       - name: Resolve release commit
         id: commit
         shell: bash
         run: |
           set -euo pipefail
-          tag="${{ steps.release.outputs.tag }}"
+          tag="${{ steps.auto.outputs.tag || steps.release.outputs.tag }}"
           sha="$(git rev-list -n 1 "$tag")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
       - name: Ensure release does not already exist
@@ -65,13 +126,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tag="${{ steps.release.outputs.tag }}"
+          tag="${{ steps.commit.outputs.tag }}"
           if gh release view "$tag" >/dev/null 2>&1; then
+            if [ "${{ steps.release.outputs.automatic }}" = "true" ] && [ "${{ steps.auto.outputs.should_publish }}" = "false" ]; then
+              echo "Release already exists for automatic tag: $tag"
+              exit 0
+            fi
             echo "::error::Release already exists: $tag"
             exit 1
           fi
 
       - name: Run release gates
+        if: steps.release.outputs.automatic != 'true' || steps.auto.outputs.should_publish == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -83,6 +149,31 @@ jobs:
           go vet ./cmd/... ./internal/...
           echo "::endgroup::"
 
+          modules=(
+            middleware
+            auth
+            crud
+            database
+            rbac
+            ratelimit
+            validation
+            file-upload
+            health
+            cache
+            pagination
+            mail
+          )
+
+          for mod in "${modules[@]}"; do
+            echo "::group::module test: $mod"
+            (cd "registry/$mod/src/go" && go test -count=1 -timeout 10m ./...)
+            echo "::endgroup::"
+
+            echo "::group::module vet: $mod"
+            (cd "registry/$mod/src/go" && go vet ./...)
+            echo "::endgroup::"
+          done
+
           echo "::group::doctor strict"
           go run ./cmd/scion doctor --strict
           echo "::endgroup::"
@@ -93,10 +184,11 @@ jobs:
           echo "::endgroup::"
 
       - name: Build release assets
+        if: steps.release.outputs.automatic != 'true' || steps.auto.outputs.should_publish == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          tag="${{ steps.release.outputs.tag }}"
+          tag="${{ steps.commit.outputs.tag }}"
           sha="${{ steps.commit.outputs.sha }}"
           ldflags="-s -w -X github.com/DarkInno/scion/internal/version.Version=$tag -X github.com/DarkInno/scion/internal/version.Commit=$sha"
 
@@ -140,20 +232,22 @@ jobs:
           (cd dist && sha256sum scion_*.tar.gz scion_*.zip > SHA256SUMS)
 
       - name: Verify built binary version
+        if: steps.release.outputs.automatic != 'true' || steps.auto.outputs.should_publish == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          tag="${{ steps.release.outputs.tag }}"
+          tag="${{ steps.commit.outputs.tag }}"
           version="$(./dist/scion_${tag}_linux_amd64/scion version)"
           echo "$version"
           grep -q "scion $tag" <<< "$version"
           grep -q "commit: ${{ steps.commit.outputs.sha }}" <<< "$version"
 
       - name: Write release notes
+        if: steps.release.outputs.automatic != 'true' || steps.auto.outputs.should_publish == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          tag="${{ steps.release.outputs.tag }}"
+          tag="${{ steps.commit.outputs.tag }}"
           cat > release-notes.md <<EOF
           ## Install
 
@@ -180,12 +274,13 @@ jobs:
           EOF
 
       - name: Publish GitHub Release
+        if: steps.release.outputs.automatic != 'true' || steps.auto.outputs.should_publish == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          tag="${{ steps.release.outputs.tag }}"
+          tag="${{ steps.commit.outputs.tag }}"
           gh release create "$tag" \
             dist/*.tar.gz \
             dist/*.zip \

@@ -106,6 +106,10 @@ old argument references.
 
 ## Tests
 
+The standalone `go.mod` uses `module scion-database` instead of
+`module database` to avoid colliding with Go's standard-library `database`
+import tree on Linux runners. The package name remains `database`.
+
 ```bash
 cd registry/database/src/go
 go test -v ./...
