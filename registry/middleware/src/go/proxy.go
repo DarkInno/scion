@@ -8,14 +8,12 @@ import (
 )
 
 const maxProxyCount = 10
+const maxProxyHeaderLen = 1024
 
 // ClientIP extracts the client IP address from the request.
-// It first checks the context (set by TrustedProxy middleware).
-// If not found, it falls back to RemoteAddr.
+// SECURITY: it always returns r.RemoteAddr (with any port stripped). It does
+// not trust X-Forwarded-For, X-Real-IP, or values stored in request context.
 func ClientIP(r *http.Request) string {
-	if ip, ok := r.Context().Value(clientIPKey).(string); ok && ip != "" {
-		return ip
-	}
 	return remoteAddrIP(r)
 }
 
@@ -84,6 +82,10 @@ func clientIPFromConfig(r *http.Request, cfg proxyConfig) string {
 	if cfg.proxyCount == 0 && len(cfg.nets) == 0 {
 		return remoteAddrIP(r)
 	}
+	remoteIP := remoteAddrIP(r)
+	if len(cfg.nets) == 0 || !isTrustedNets(remoteIP, cfg.nets) {
+		return remoteAddrIP(r)
+	}
 
 	// Try X-Forwarded-For first.
 	xff := r.Header.Get("X-Forwarded-For")
@@ -94,9 +96,12 @@ func clientIPFromConfig(r *http.Request, cfg proxyConfig) string {
 	if xff == "" {
 		return remoteAddrIP(r)
 	}
+	if len(xff) > maxProxyHeaderLen || strings.ContainsAny(xff, "\r\n\x00") {
+		return remoteAddrIP(r)
+	}
 
 	// X-Forwarded-For: client, proxy1, proxy2, ..., proxyN
-	ips := strings.Split(xff, ",")
+	ips := strings.SplitN(xff, ",", maxProxyCount+2)
 
 	// ProxyCount mode.
 	if cfg.proxyCount > 0 {

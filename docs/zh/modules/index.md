@@ -1,6 +1,6 @@
 # 模块概览
 
-Scion 提供 11 个生产就绪、可复制粘贴的 Go 模块。每个模块自包含。模块默认仅使用标准库；安全例外会在 registry 中显式标记。
+Scion 提供 12 个生产就绪、可复制粘贴的 Go 模块。每个模块自包含。模块默认仅使用标准库；安全例外会在 registry 中显式标记。
 
 ## 可用模块
 
@@ -8,6 +8,7 @@ Scion 提供 11 个生产就绪、可复制粘贴的 Go 模块。每个模块自
 |------|------|---------|
 | [Auth](/zh/modules/auth) | JWT 认证 + bcrypt | 限流，用户枚举防护，JTI |
 | [CRUD](/zh/modules/crud) | 通用 CRUD + 分页 | 排序/过滤白名单，SQL注入防护 |
+| [Database](/zh/modules/database) | `database/sql` 设置 + 事务 | DSN 安全错误，SQL 片段白名单 |
 | [Middleware](/zh/modules/middleware) | Recovery、CORS、日志、超时 | CRLF 注入防护，请求体大小限制 |
 | [RBAC](/zh/modules/rbac) | 基于角色的访问控制 | 通配符权限，循环检测 |
 | [Rate Limit](/zh/modules/ratelimit) | 固定/滑动窗口、令牌桶 | 内存耗尽防护，LRU 淘汰 |

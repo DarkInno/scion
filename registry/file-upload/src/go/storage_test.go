@@ -49,3 +49,35 @@ func TestStorageMemoryCopiesData(t *testing.T) {
 		t.Fatal("file should not exist after delete")
 	}
 }
+
+func TestMemoryStorageEvictsLeastRecentlyUsed(t *testing.T) {
+	ctx := context.Background()
+	storage := NewMemoryStorage("/files")
+	storage.MaxFiles = 2
+
+	if _, err := storage.Save(ctx, "a.txt", []byte("a")); err != nil {
+		t.Fatalf("Save a: %v", err)
+	}
+	if _, err := storage.Save(ctx, "b.txt", []byte("b")); err != nil {
+		t.Fatalf("Save b: %v", err)
+	}
+	if _, err := storage.Get(ctx, "a.txt"); err != nil {
+		t.Fatalf("Get a: %v", err)
+	}
+	if _, err := storage.Save(ctx, "c.txt", []byte("c")); err != nil {
+		t.Fatalf("Save c: %v", err)
+	}
+
+	if !storage.Exists(ctx, "a.txt") {
+		t.Fatal("recently used file should still exist")
+	}
+	if storage.Exists(ctx, "b.txt") {
+		t.Fatal("least recently used file should be evicted")
+	}
+	if !storage.Exists(ctx, "c.txt") {
+		t.Fatal("new file should exist")
+	}
+	if _, err := storage.Get(ctx, "b.txt"); !errors.Is(err, ErrFileNotFound) {
+		t.Fatalf("Get evicted file = %v, want ErrFileNotFound", err)
+	}
+}

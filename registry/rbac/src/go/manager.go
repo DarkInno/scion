@@ -17,6 +17,17 @@ var ErrCircularDependency = errors.New("circular dependency detected in role hie
 // ErrInvalidName is returned when a name fails validation.
 var ErrInvalidName = errors.New("invalid name: must be non-empty, <= 128 chars, no CRLF or null bytes")
 
+// ErrLimitExceeded is returned when an in-memory collection reaches its
+// safety cap.
+var ErrLimitExceeded = errors.New("capacity limit exceeded")
+
+const (
+	maxRoles           = 10000
+	maxUsers           = 10000
+	maxRoleParents     = 64
+	maxRolePermissions = 256
+)
+
 // Manager manages roles, users, and permission checks.
 // All methods are safe for concurrent use.
 type Manager struct {
@@ -39,6 +50,9 @@ func (m *Manager) AddRole(role *Role) error {
 	if role == nil || !validateName(role.Name) {
 		return ErrInvalidName
 	}
+	if len(role.Permissions) > maxRolePermissions || len(role.Parents) > maxRoleParents {
+		return ErrLimitExceeded
+	}
 	for _, p := range role.Permissions {
 		if !validateName(p.Resource) || !validateName(p.Action) {
 			return ErrInvalidName
@@ -55,6 +69,9 @@ func (m *Manager) AddRole(role *Role) error {
 
 	if _, exists := m.roles[role.Name]; exists {
 		return ErrRoleExists
+	}
+	if len(m.roles) >= maxRoles {
+		return ErrLimitExceeded
 	}
 
 	// Check for circular dependencies before adding.
@@ -150,6 +167,9 @@ func (m *Manager) AssignRole(userID, roleName string) error {
 
 	user, exists := m.users[userID]
 	if !exists {
+		if len(m.users) >= maxUsers {
+			return ErrLimitExceeded
+		}
 		user = &User{ID: userID}
 		m.users[userID] = user
 	}

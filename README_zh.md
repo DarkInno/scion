@@ -74,6 +74,7 @@ Get-FileHash .\scion_v0.1.3_windows_amd64.zip -Algorithm SHA256
 |------|------|----------|
 | [auth](registry/auth/) | JWT 邮箱/密码认证 + bcrypt | 限流、用户枚举防护、JTI、aud/iss 校验 |
 | [crud](registry/crud/) | 泛型 CRUD + 分页 | 排序/过滤白名单、SQL 注入防护、分页上限 |
+| [database](registry/database/) | `database/sql` 设置 + 事务 | DSN 安全错误、SQL 片段白名单、参数化值 |
 | [middleware](registry/middleware/) | Recovery、CORS、日志、超时等 | CRLF 注入防护、可信代理、请求体大小限制 |
 | [rbac](registry/rbac/) | 基于角色的访问控制 | 通配符权限、循环检测、层级继承 |
 | [ratelimit](registry/ratelimit/) | 固定窗口 / 滑动窗口 / 令牌桶 | 内存耗尽防护、LRU 驱逐、key 长度限制 |
@@ -109,6 +110,7 @@ scion/
 |   |-- auth/               # 认证模块
 |   |-- cache/              # TTL + LRU 缓存
 |   |-- crud/               # CRUD 模块
+|   |-- database/           # database/sql 工具
 |   |-- file-upload/        # 文件上传模块
 |   |-- health/             # 健康检查模块
 |   |-- mail/               # SMTP 邮件模块
@@ -143,7 +145,7 @@ go run ./cmd/scion doctor --strict
 PowerShell 中运行所有 registry 模块测试：
 
 ```powershell
-$modules = @('middleware','auth','crud','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
+$modules = @('middleware','auth','crud','database','rbac','ratelimit','validation','file-upload','health','cache','pagination','mail')
 foreach ($m in $modules) { Push-Location "registry/$m/src/go"; go test ./...; Pop-Location }
 ```
 

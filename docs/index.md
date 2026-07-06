@@ -25,6 +25,10 @@ features:
     title: CRUD
     details: Generic CRUD operations with pagination, sort/filter whitelist, SQL injection prevention.
     link: /modules/crud
+  - icon: SQL
+    title: Database
+    details: database/sql setup, transactions, and whitelisted query fragments.
+    link: /modules/database
   - icon: 🛡️
     title: Middleware
     details: Recovery, CORS, logging, timeout, request ID, body size limit.

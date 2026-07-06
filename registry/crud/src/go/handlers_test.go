@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -27,6 +28,7 @@ type mockEntityStore[T any] struct {
 	deleteErr error
 	listData  []T
 	listTotal int64
+	lastList  ListParams
 }
 
 func newMockEntityStore[T any]() *mockEntityStore[T] {
@@ -51,7 +53,8 @@ func (m *mockEntityStore[T]) GetByID(id uint) (*T, error) {
 	return e, nil
 }
 
-func (m *mockEntityStore[T]) List(_ ListParams) ([]T, int64, error) {
+func (m *mockEntityStore[T]) List(params ListParams) ([]T, int64, error) {
+	m.lastList = params
 	if m.listErr != nil {
 		return nil, 0, m.listErr
 	}
@@ -238,6 +241,24 @@ func TestHandler_List_FilterAllowed(t *testing.T) {
 	}
 }
 
+func TestHandler_List_FilterDisabledByDefault(t *testing.T) {
+	store := newMockEntityStore[Product]()
+	cfg := &Config{DefaultPageSize: 20, MaxPageSize: 100}
+	h := NewHandler(store, cfg)
+
+	req := httptest.NewRequest(http.MethodGet, "/products?password=secret", nil)
+	rr := httptest.NewRecorder()
+
+	h.List(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Errorf("expected status %d, got %d: %s", http.StatusOK, rr.Code, rr.Body.String())
+	}
+	if store.lastList.Filter != nil {
+		t.Fatalf("expected filters to be disabled, got %#v", store.lastList.Filter)
+	}
+}
+
 func TestHandler_List_FilterDisallowed(t *testing.T) {
 	store := newMockEntityStore[Product]()
 	cfg := &Config{DefaultPageSize: 20, MaxPageSize: 100}
@@ -253,6 +274,28 @@ func TestHandler_List_FilterDisallowed(t *testing.T) {
 	}
 	if !strings.Contains(rr.Body.String(), "invalid filter field") {
 		t.Errorf("expected filter field error, got %s", rr.Body.String())
+	}
+}
+
+func TestHandler_List_RejectsTooManyFilters(t *testing.T) {
+	store := newMockEntityStore[Product]()
+	cfg := &Config{DefaultPageSize: 20, MaxPageSize: 100}
+	allowed := make(map[string]bool, maxFilterCount+1)
+	q := make([]string, 0, maxFilterCount+1)
+	for i := 0; i < maxFilterCount+1; i++ {
+		key := "f" + strconv.Itoa(i)
+		allowed[key] = true
+		q = append(q, key+"=x")
+	}
+	h := NewHandler(store, cfg).WithFilterFields(allowed)
+
+	req := httptest.NewRequest(http.MethodGet, "/products?"+strings.Join(q, "&"), nil)
+	rr := httptest.NewRecorder()
+
+	h.List(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, rr.Code)
 	}
 }
 
@@ -368,6 +411,17 @@ func TestHandler_Delete_InvalidID(t *testing.T) {
 
 	if rr.Code != http.StatusBadRequest {
 		t.Errorf("expected status %d, got %d", http.StatusBadRequest, rr.Code)
+	}
+}
+
+func TestDecodeBodyRejectsOversizedValidJSONPrefix(t *testing.T) {
+	prefix := []byte(`{"name":"Widget"}`)
+	body := append(prefix, bytes.Repeat([]byte(" "), maxRequestBodySize-len(prefix)+1)...)
+	req := httptest.NewRequest(http.MethodPost, "/products", bytes.NewReader(body))
+
+	var dst Product
+	if err := decodeBody(req, &dst); err == nil {
+		t.Fatal("expected oversized body error")
 	}
 }
 

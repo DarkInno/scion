@@ -18,6 +18,8 @@ var (
 	ErrInvalidName = errors.New("fileupload: invalid filename")
 )
 
+const defaultMemoryStorageMaxFiles = 1024
+
 // Storage abstracts where and how uploaded files are persisted. Implementations
 // must reject any name that contains path separators or traversal segments so
 // that path-traversal attacks cannot escape the storage root.
@@ -146,15 +148,18 @@ func (s *LocalStorage) Exists(ctx context.Context, name string) bool {
 // services, and deployments where persistence is handled elsewhere.
 type MemoryStorage struct {
 	URLPrefix string
+	MaxFiles  int
 
-	mu    sync.RWMutex
+	mu    sync.Mutex
 	files map[string][]byte
+	order []string
 }
 
 // NewMemoryStorage creates an empty MemoryStorage.
 func NewMemoryStorage(urlPrefix string) *MemoryStorage {
 	return &MemoryStorage{
 		URLPrefix: urlPrefix,
+		MaxFiles:  defaultMemoryStorageMaxFiles,
 		files:     make(map[string][]byte),
 	}
 }
@@ -167,36 +172,106 @@ func (s *MemoryStorage) Save(ctx context.Context, name string, data []byte) (str
 	cp := make([]byte, len(data))
 	copy(cp, data)
 	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.files == nil {
+		s.files = make(map[string][]byte)
+	}
+	if _, exists := s.files[name]; exists {
+		s.files[name] = cp
+		s.touchLocked(name)
+		return strings.TrimRight(s.URLPrefix, "/") + "/" + name, nil
+	}
+	for len(s.files) >= s.maxFilesLocked() {
+		s.evictOldestLocked()
+	}
 	s.files[name] = cp
-	s.mu.Unlock()
+	s.order = append(s.order, name)
 	return strings.TrimRight(s.URLPrefix, "/") + "/" + name, nil
 }
 
 // Get implements Storage.
 func (s *MemoryStorage) Get(ctx context.Context, name string) ([]byte, error) {
-	s.mu.RLock()
+	if err := safeName(name); err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
 	data, ok := s.files[name]
-	s.mu.RUnlock()
 	if !ok {
+		s.mu.Unlock()
 		return nil, ErrFileNotFound
 	}
+	s.touchLocked(name)
 	out := make([]byte, len(data))
 	copy(out, data)
+	s.mu.Unlock()
 	return out, nil
 }
 
 // Delete implements Storage.
 func (s *MemoryStorage) Delete(ctx context.Context, name string) error {
+	if err := safeName(name); err != nil {
+		return err
+	}
 	s.mu.Lock()
 	delete(s.files, name)
+	s.removeFromOrderLocked(name)
 	s.mu.Unlock()
 	return nil
 }
 
 // Exists implements Storage.
 func (s *MemoryStorage) Exists(ctx context.Context, name string) bool {
-	s.mu.RLock()
+	if err := safeName(name); err != nil {
+		return false
+	}
+	s.mu.Lock()
 	_, ok := s.files[name]
-	s.mu.RUnlock()
+	if ok {
+		s.touchLocked(name)
+	}
+	s.mu.Unlock()
 	return ok
+}
+
+func (s *MemoryStorage) maxFilesLocked() int {
+	if s.MaxFiles <= 0 {
+		return defaultMemoryStorageMaxFiles
+	}
+	return s.MaxFiles
+}
+
+func (s *MemoryStorage) evictOldestLocked() {
+	for len(s.order) > 0 {
+		name := s.order[0]
+		s.order = s.order[1:]
+		if _, ok := s.files[name]; ok {
+			delete(s.files, name)
+			return
+		}
+	}
+	for name := range s.files {
+		delete(s.files, name)
+		return
+	}
+}
+
+func (s *MemoryStorage) touchLocked(name string) {
+	for i, existing := range s.order {
+		if existing == name {
+			copy(s.order[i:], s.order[i+1:])
+			s.order[len(s.order)-1] = name
+			return
+		}
+	}
+	s.order = append(s.order, name)
+}
+
+func (s *MemoryStorage) removeFromOrderLocked(name string) {
+	for i, existing := range s.order {
+		if existing == name {
+			copy(s.order[i:], s.order[i+1:])
+			s.order = s.order[:len(s.order)-1]
+			return
+		}
+	}
 }
